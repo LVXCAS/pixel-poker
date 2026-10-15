@@ -337,6 +337,7 @@
   }
 
   function coachEnabled() {
+    if (game && game.net && !game.net.coachAllowed) return false;
     const t = game && game.tutor;
     return t && typeof t.coach === 'boolean' ? t.coach : settings.coach;
   }
@@ -750,6 +751,54 @@
     return g;
   }
 
+
+  // ------------------------------------------------------------- net games (MULTIPLAYER.md 9.2)
+  // spec = room.start() (host) or client.tableSpec() (client / spectator). The room drives hands; main only
+  // renders and answers the local seat. Engine listeners here never await a modal (it would stall the table).
+  function startNetGame(spec) {
+    endGame();
+    gameCounter += 1;
+    const g = {
+      id: gameCounter, active: true, engine: spec.engine, bots: spec.bots || {}, meta: spec.meta, names: spec.names,
+      stack: 0, sb: spec.sb, bb: spec.bb, hand: null, lastRecord: null, lastReview: null, next: null, autoTimer: 0, net: spec,
+    };
+    game = g;
+    const provider = (player, view, legal) => provideAction(g, player, view, legal);
+    if (spec.isHost) spec.room.setLocalActionProvider(provider);
+    else spec.engine.actionProvider = provider;
+    bindEngineEvents(g);
+    g.engine.on('handEnd', (p) => { if (isLive(g)) netAfterHand(g, (p && p.record) || {}); });
+    g.engine.on('sync', (p) => { if (isLive(g)) { g.hand = newHandState(p.view); UI.renderView(p.view); } });
+    const offs = [
+      spec.room.on('timer', (t) => UI.startTimer(t.playerId, t.ms)),
+      spec.room.on('turnCancelled', (t) => { if (t.playerId === HERO_ID && UI.isAwaitingHuman()) UI.cancelHumanAction(); }),
+      spec.room.on('tourney', (s) => { g.bb = s.bb; UI.byId('tb-blinds').textContent = 'BLINDS ' + s.sb + '/' + s.bb; }),
+    ];
+    g.netOff = () => offs.forEach((off) => off());
+    g.next = spec.isHost ? () => spec.room.dealNow() : null;
+    UI.byId('btn-next').hidden = !spec.isHost;
+    UI.showScreen('table');
+    UI.clearLog();
+    UI.buildTable(g.engine.players.map((p) => ({ id: p.id, name: p.name, seat: p.seat, stack: p.stack })),
+      spec.heroId, g.meta);
+    UI.byId('tb-blinds').textContent = 'BLINDS ' + g.sb + '/' + g.bb;
+    UI.byId('tb-hand').textContent = 'HAND #' + (g.engine.handNumber || 0);
+    const view = g.engine.publicView(HERO_ID);
+    g.hand = newHandState(view);
+    if (view.handNumber > 0) UI.renderView(view);   // late join / rejoin: the sync may already be in
+    UI.renderCoach(null, coachOptions());
+    syncTopbar();
+    UI.log(spec.isHost ? 'Your table is live. Good luck!' : 'Seated at a friend\'s table. Good luck!', 'sep');
+    return g;
+  }
+
+  function netAfterHand(g, record) {   // sync and cheap: no stats mixing, no modal
+    g.lastRecord = record;
+    g.lastReview = buildReview(g, record);
+    UI.byId('btn-review').disabled = !g.lastReview;
+    UI.setActionMode('between', '');
+  }
+
   function endGame() {
     const g = game;
     if (!g) return;
@@ -758,6 +807,9 @@
     clearTimeout(g.autoTimer);
     if (UI.isAwaitingHuman()) UI.cancelHumanAction();
     if (g.next) g.next();
+    if (g.netOff) g.netOff();
+    UI.byId('btn-next').hidden = false;
+    if (g.net && g.net.onLeave) g.net.onLeave();   // the Lobby guards against re-entry
     UI.setMood('calm');
     if (g.tutor && g.tutor.onEnd) g.tutor.onEnd();
   }
@@ -766,13 +818,15 @@
     if (!game) { UI.showScreen('title'); return; }
     const choice = await UI.openModal({
       title: 'LEAVE TABLE?',
-      body: UI.el('p', 'modal-text', 'Your current game will end. Stats so far are saved.'),
+      body: UI.el('p', 'modal-text', !game.net ? 'Your current game will end. Stats so far are saved.'
+        : game.net.isHost ? 'This ends the game for everyone at the table.' : 'You can rejoin with the same code.'),
       actions: [{ label: 'STAY', kind: 'blue', value: 'stay', primary: true }, { label: 'LEAVE', kind: 'red', value: 'leave' }],
       cancelValue: 'stay',
     });
     if (choice !== 'leave') return;
+    const wasNet = !!(game && game.net);
     endGame();
-    UI.showScreen('title');
+    if (!wasNet) UI.showScreen('title');   // net games: the Lobby's onLeave already opened the hub
   }
 
   // -------------------------------------------------------------------- topbar
@@ -1083,6 +1137,20 @@
     UI.setSpeed(SPEED_OPTIONS[settings.speedIdx].factor);
     bindNav();
     bindTopbar();
+    const mpRoot = UI.byId('mp-root');
+    if (PP.Lobby && mpRoot) {
+      const lobby = PP.Lobby.mount(mpRoot, {
+        UI, Net: PP.Net, Room: PP.Room, Tournament: PP.Tournament, Bots: PP.Bots,
+        overlayRoot: UI.byId('mp-overlay'), showScreen: UI.showScreen, startNetGame, endNetGame: endGame,
+        storage: (() => { try { return globalThis.localStorage || null; } catch (e) { return null; } })(),
+        location: globalThis.location,
+      });
+      UI.byId('nav-multi').addEventListener('click', () => lobby.openHub());
+      globalThis.addEventListener('beforeunload', (e) => {
+        if (game && game.net && game.net.isHost && game.net.room.phase === 'playing') { e.preventDefault(); e.returnValue = ''; }
+      });
+      if (lobby.handleInviteLink()) { decorateTitle(); return; }   // invite links skip the title
+    }
     decorateTitle();
     const missing = missingModules();
     const warn = UI.byId('title-warning');
@@ -1096,6 +1164,8 @@
     startCustomGame: (custom) => startGame(custom),
     endGame,
     isPlaying: () => !!game,
+    startNetGame,
+    endNetGame: endGame,
   });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

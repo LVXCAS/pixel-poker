@@ -1232,7 +1232,8 @@
     if (!PP.App || !PP.Cards) return;
     buildOverlay();
     bindLaunch();
-    if (!progress.offered && !progress.done.length) offerFirstRun();
+    const invite = /[?&]room=/.test((globalThis.location && globalThis.location.search) || '');
+    if (!invite && !progress.offered && !progress.done.length) offerFirstRun();
   }
 
   /** Read-only: which lesson is running and the move it is waiting for (used by the browser check). */

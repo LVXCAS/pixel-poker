@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multiplayer Preview</title>
+  <meta name="description" content="Dev-only preview of the PIXEL HOLD'EM multiplayer lobby and overlay against mocked Net/Room. Not linked from the game.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/multiplayer.css">
+  <style>
+    /* preview-only: a stand-in table (a real screenshot) behind the overlay, and a scenario picker */
+    .pv-table { background: var(--room); }
+    .pv-table img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+    .pv-title p { position: absolute; left: calc(17 * var(--u)); top: calc(40 * var(--u)); color: var(--text); font-size: var(--f2); line-height: var(--l2); }
+    #pv-panel {
+      position: fixed; right: 8px; bottom: 8px; z-index: 100; max-width: 340px; max-height: 70vh; overflow: auto;
+      background: #0e0806; color: #f0e3c8; border: 2px solid #4f2f1c; padding: 8px; font: 13px/1.4 ui-monospace, Menlo, monospace;
+      text-transform: none; user-select: text;
+    }
+    #pv-panel button { margin: 2px; padding: 2px 6px; background: #3b1611; color: #f0e3c8; border: 0; font: inherit; cursor: pointer; }
+    #pv-panel button:hover { background: #5f2619; }
+    #pv-log { margin-top: 6px; color: #cfd6cb; white-space: pre-wrap; max-height: 120px; overflow: auto; }
+    body.pv-shot #pv-panel { display: none; }
+  </style>
+</head>
+<body data-screen="mp" data-mood="calm" class="lit">
+  <canvas id="bg" aria-hidden="true"></canvas>
+  <div id="app">
+    <section class="screen" id="screen-title" aria-label="Title">
+      <div class="stage pv-title"><p>pixel hold'em (title stub)</p></div>
+    </section>
+    <section class="screen" id="screen-mp" aria-label="Multiplayer"><div class="mp" id="mp-root"></div></section>
+    <section class="screen" id="screen-table" aria-label="Poker table">
+      <div class="stage pv-table"><img id="pv-table-img" src="screenshots/v2/table.png" alt=""></div>
+      <div class="mp-overlay" id="mp-overlay" hidden></div>
+    </section>
+  </div>
+  <div id="modal-root"></div>
+  <nav id="pv-panel" aria-label="Preview scenarios"><strong>multiplayer preview</strong><div id="pv-buttons"></div><div id="pv-log"></div></nav>
+
+  <script src="js/cards.js"></script>
+  <script src="js/evaluator.js"></script>
+  <script src="js/equity.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/bots.js"></script>
+  <script src="js/tournament.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+  /* ------------------------------------------------------------------ mocks
+   * Shapes follow MULTIPLAYER.md sections 2, 4 and 5. Deterministic, no network. */
+  (function () {
+    'use strict';
+    const PP = globalThis.PP;
+    const log = (m) => { const n = document.getElementById('pv-log'); n.textContent = (m + '\n' + n.textContent).slice(0, 2000); };
+    function emitter() {
+      const map = new Map();
+      return {
+        on(n, f) { if (!map.has(n)) map.set(n, new Set()); map.get(n).add(f); return () => map.get(n).delete(f); },
+        emit(n, p) { (map.get(n) || []).forEach((f) => { try { f(p); } catch (e) { console.error(e); } }); },
+      };
+    }
+    function netError(code) { const e = new Error(code); e.name = 'NetError'; e.code = code; return e; }
+    const ALPHA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+    const DEFAULTS = { mode: 'cash', maxSeats: 6, startingStack: 1000, sb: 10, bb: 20, sngPreset: 'regular', antes: false,
+      turnSeconds: 30, coachAllowed: true, disconnectPolicy: 'autofold', rebuys: true, locked: false };
+    const BOT_NAMES = ['bit queen', 'crt carl', 'neon nina', 'pixel pete', 'synth sue', 'dot matrix', 'laser lou', 'tilt'];
+    const M = { createHost: 'ok', join: 'ok', lastRoom: null, lastClient: null };
+
+    const Net = {
+      ERR: {},
+      normalizeCode(input) {
+        if (typeof input !== 'string') return null;
+        const c = input.trim().toUpperCase().replace(/[\s-]/g, '');
+        return c.length === 5 && [...c].every((ch) => ALPHA.includes(ch)) ? c : null;
+      },
+      inviteUrl(code) { return 'https://lvxcas.github.io/pixel-poker/?room=' + code; },
+      codeFromLocation(loc) { const m = /[?&]room=([^&]+)/.exec(loc.search || ''); return m ? Net.normalizeCode(decodeURIComponent(m[1])) : null; },
+      createHost() {
+        if (M.createHost === 'pending') return new Promise(() => {});
+        if (M.createHost !== 'ok') return Promise.reject(netError(M.createHost));
+        return Promise.resolve({ role: 'host', code: 'K7QXM', close() {} });
+      },
+    };
+
+    class HostRoom {
+      constructor(o) {
+        this.ev = emitter();
+        this.code = o.endpoint ? o.endpoint.code : null;
+        this.phase = 'lobby';
+        this.settings = Object.assign({}, DEFAULTS, o.settings || {});
+        if (this.settings.mode === 'sng') this.settings.startingStack = 1500;
+        this.seats = [{ id: 'hero', kind: 'host', name: o.hostName, avatar: o.hostAvatar, rating: 0, conn: 'online', sittingOut: false, stack: null, place: null }];
+        this.spectators = [];
+        this.nb = 0;
+        M.lastRoom = this;
+      }
+      on(n, f) { return this.ev.on(n, f); }
+      lobbyState() {
+        return { v: 1, code: this.code, phase: this.phase, hostName: this.seats[0].name, settings: Object.assign({}, this.settings),
+          seats: this.seats.map((s) => Object.assign({}, s)), spectators: this.spectators.slice() };
+      }
+      changed() { this.ev.emit('lobby', this.lobbyState()); }
+      updateSettings(p) {
+        const next = Object.assign({}, this.settings, p);
+        if (p.mode && p.mode !== this.settings.mode) next.startingStack = p.mode === 'sng' ? 1500 : 1000;
+        this.settings = next;
+        this.changed();
+      }
+      addBot(rating) {
+        if (this.seats.length >= this.settings.maxSeats) return null;
+        this.nb += 1;
+        const id = 'b' + this.nb;
+        this.seats.push({ id, kind: 'bot', name: BOT_NAMES[(this.nb - 1) % BOT_NAMES.length], avatar: '', rating: rating || 3, conn: 'bot', sittingOut: false, stack: null, place: null });
+        this.changed();
+        return id;
+      }
+      addHuman(id, name, avatar, conn) {
+        this.seats.push({ id, kind: 'human', name, avatar, rating: 0, conn: conn || 'online', sittingOut: false, stack: null, place: null });
+        this.changed();
+      }
+      setBotRating(id, r) { this.seats = this.seats.map((s) => (s.id === id ? Object.assign({}, s, { rating: r }) : s)); this.changed(); }
+      removeSeat(id) { this.seats = this.seats.filter((s) => s.id !== id); this.changed(); }
+      kick(id) { this.removeSeat(id); this.emitSeats(); }
+      start() {
+        this.phase = 'playing';
+        const st = this.settings.startingStack;
+        this.seats = this.seats.map((s) => Object.assign({}, s, { stack: st }));
+        log('room.start()');
+        return Object.freeze({ engine: { mock: true }, heroId: 'hero', players: this.seats.map((s, i) => ({ id: s.id, name: s.name, seat: i, stack: st })),
+          meta: {}, names: {}, sb: this.settings.sb, bb: this.settings.bb, bots: {}, isHost: true, room: this, coachAllowed: true, mode: this.settings.mode });
+      }
+      run() { return new Promise(() => {}); }
+      setLocalActionProvider() {}
+      dealNow() {}
+      setStacks(map) { this.seats = this.seats.map((s) => (s.id in map ? Object.assign({}, s, map[s.id]) : s)); this.emitSeats(); }
+      emitSeats() { this.ev.emit('seats', this.seats.map((s) => Object.assign({}, s))); }
+      requestRebuy() { log('rebuy requested'); }
+      setSittingOut(id, on) { this.setStacks({ [id]: { sittingOut: on } }); }
+      sendChat(text) { this.ev.emit('chat', { from: { seatId: 'hero', name: this.seats[0].name }, text, ts: Date.now() }); }
+      sendEmote(id) { this.ev.emit('emote', { from: { seatId: 'hero', name: this.seats[0].name }, id }); }
+      endGame() { log('endGame'); }
+      backToLobby() { this.phase = 'lobby'; this.seats = this.seats.map((s) => Object.assign({}, s, { stack: null, place: null })); this.changed(); }
+      close() { log('room.close()'); }
+    }
+
+    class Client {
+      constructor(o) {
+        this.ev = emitter();
+        this.selfId = 'h2'; this.role = 'player'; this.token = '0123456789abcdef0123456789abcdef'; this.engine = null;
+        this.code = o.code;
+        const seats = [
+          { id: 'h2', kind: 'host', name: 'lucas', avatar: 'a2', rating: 0, conn: 'online', sittingOut: false, stack: null, place: null },
+          { id: 'h1', kind: 'human', name: 'dev', avatar: 'a5', rating: 0, conn: 'away', sittingOut: false, stack: null, place: null },
+          { id: 'hero', kind: 'human', name: o.name, avatar: o.avatar, rating: 0, conn: 'online', sittingOut: false, stack: null, place: null, isYou: true },
+          { id: 'b1', kind: 'bot', name: 'bit queen', avatar: '', rating: 4, conn: 'bot', sittingOut: false, stack: null, place: null },
+          { id: 'b2', kind: 'bot', name: 'crt carl', avatar: '', rating: 2, conn: 'bot', sittingOut: false, stack: null, place: null },
+        ];
+        this.lobby = { v: 1, code: o.code, phase: 'lobby', hostName: 'lucas', settings: Object.assign({}, DEFAULTS, { turnSeconds: 30 }), seats, spectators: [{ name: 'gran' }] };
+        M.lastClient = this;
+      }
+      on(n, f) { return this.ev.on(n, f); }
+      tableSpec() { return { engine: this.engine, heroId: 'hero', players: [], meta: {}, names: {}, sb: 10, bb: 20, bots: {}, isHost: false, room: this, coachAllowed: true, mode: this.lobby.settings.mode }; }
+      startGame() {
+        this.engine = { mock: Math.random() };
+        this.lobby = Object.assign({}, this.lobby, { phase: 'playing' });
+        this.lobby.seats = this.lobby.seats.map((s) => Object.assign({}, s, { stack: this.lobby.settings.startingStack }));
+        this.ev.emit('start', this.tableSpec());
+        this.ev.emit('seats', this.lobby.seats);
+      }
+      setSeats(map) { this.lobby.seats = this.lobby.seats.map((s) => (s.id in map ? Object.assign({}, s, map[s.id]) : s)); this.ev.emit('seats', this.lobby.seats); }
+      sendChat(text) { this.ev.emit('chat', { from: { seatId: 'hero', name: 'maya' }, text, ts: Date.now() }); }
+      sendEmote(id) { this.ev.emit('emote', { from: { seatId: 'hero', name: 'maya' }, id }); }
+      setSittingOut(on) { this.setSeats({ hero: { sittingOut: on } }); }
+      requestRebuy() { log('client rebuy'); }
+      leave() { log('client.leave()'); }
+    }
+    const Room = {
+      HostRoom,
+      joinRoom(o) {
+        if (M.join === 'pending') return new Promise(() => {});
+        if (M.join !== 'ok') return new Promise((_, rej) => setTimeout(() => rej(netError(M.join)), 300));
+        return Promise.resolve(new Client(o));
+      },
+    };
+    globalThis.PVMock = { M, Net, Room, log, netError };
+  })();
+  </script>
+  <script src="js/lobby.js"></script>
+  <script>
+  /* ------------------------------------------------------------ scenario driver
+   * ?state=<name> jumps straight to a state; &shot=1 hides this panel (for screenshots). */
+  (function () {
+    'use strict';
+    const PP = globalThis.PP;
+    const UI = PP.UI;
+    const { M, Net, Room, log } = globalThis.PVMock;
+    const params = new URLSearchParams(location.search);
+    if (params.get('shot')) document.body.classList.add('pv-shot');
+    const mem = new Map();
+    const storage = { getItem: (k) => (mem.has(k) ? mem.get(k) : null), setItem: (k, v) => mem.set(k, String(v)), removeItem: (k) => mem.delete(k) };
+    const fresh = params.get('fresh') === '1';
+    storage.setItem('pixelholdem.mp.v1', JSON.stringify(fresh ? {} : {
+      profile: { name: 'lucas', avatar: 'a2' },
+      rejoin: { code: 'K7QXM', token: '0123456789abcdef0123456789abcdef', name: 'lucas', avatar: 'a2', ts: Date.now() - 600000 },
+      history: [],
+    }));
+    UI.startBackground(document.getElementById('bg'));
+    const tableImg = document.getElementById('pv-table-img');
+    const lobby = PP.Lobby.mount(document.getElementById('mp-root'), {
+      UI, Net, Room, Tournament: PP.Tournament, Bots: PP.Bots,
+      overlayRoot: document.getElementById('mp-overlay'),
+      showScreen: UI.showScreen,
+      startNetGame: (spec) => { log('startNetGame(' + (spec.isHost ? 'host' : 'client') + ')'); UI.showScreen('table'); },
+      endNetGame: () => log('endNetGame()'),
+      storage, location: { search: '', origin: 'file://', pathname: '/' },
+    });
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const $ = (sel) => document.querySelector(sel);
+    const click = (sel) => { const n = $(sel); if (n) n.click(); else log('missing ' + sel); };
+    function type(sel, text) { const i = $(sel); i.value = text; i.dispatchEvent(new Event('input', { bubbles: true })); }
+
+    async function hostLobby(mode) {
+      M.createHost = 'ok';
+      await lobby.openHost({ mode });
+      const r = M.lastRoom;
+      r.addHuman('h1', 'maya', 'a4', 'online');
+      r.addHuman('h2', 'dev', 'a5', 'away');
+      r.addBot(4);
+      r.addBot(2);
+      r.spectators = [{ name: 'gran' }];
+      r.changed();
+      return r;
+    }
+    async function clientLobby(name) {
+      M.join = 'ok';
+      lobby.openJoin('K7QXM');
+      type('[data-key="join-name"]', name || 'maya');
+      click('[data-key="join-btn"]');
+      await wait(50);
+      return M.lastClient;
+    }
+    function tourney(level) {
+      return {
+        preset: 'regular', level, sb: 25, bb: 50, ante: 5, handsPlayed: 24, handsPerLevel: 10, handsToNext: 6,
+        next: { sb: 50, bb: 100, ante: 10 }, entrants: 8, alive: 6, payouts: [50, 30, 20], complete: false,
+        standings: [
+          { id: 'b3', name: 'neon nina', stack: 2410, place: null, points: null }, { id: 'hero', name: 'lucas', stack: 1980, place: null, points: null },
+          { id: 'b1', name: 'bit queen', stack: 1650, place: null, points: null }, { id: 'b2', name: 'crt carl', stack: 1240, place: null, points: null },
+          { id: 'b6', name: 'dot matrix', stack: 1500, place: null, points: null }, { id: 'b4', name: 'pixel pete', stack: 1220, place: null, points: null },
+          { id: 'b5', name: 'synth sue', stack: 0, place: 7, points: 0 }, { id: 'b7', name: 'laser lou', stack: 0, place: 8, points: 0 },
+        ],
+        eliminated: [{ id: 'b7', name: 'laser lou', place: 8, points: 0 }, { id: 'b5', name: 'synth sue', place: 7, points: 0 }],
+      };
+    }
+    async function sngGame() {
+      lobby.openOfflineSng();
+      const r0 = M.lastRoom;
+      r0.updateSettings({ maxSeats: 8 });
+      r0.addBot(3);
+      r0.addBot(1);
+      click('[data-key="start"]');
+      await wait(30);
+      const r = M.lastRoom;
+      tableImg.src = 'screenshots/v2/table-8.png';
+      r.setStacks({ b3: { stack: 2410 }, hero: { stack: 1980 }, b1: { stack: 1650 }, b2: { stack: 1240 }, b4: { stack: 1220 }, b6: { stack: 1500 }, b7: { stack: 0, place: 8 }, b5: { stack: 0, place: 7 } });
+      r.ev.emit('tourney', tourney(3));
+      return r;
+    }
+    async function cashGame() {
+      const r = await hostLobby('cash');
+      click('[data-key="start"]');
+      await wait(30);
+      r.setStacks({ hero: { stack: 1240 }, h1: { stack: 860 }, h2: { stack: 1000, conn: 'away' }, b1: { stack: 1520 }, b2: { stack: 380 } });
+      return r;
+    }
+    function chatter(src, mine) {
+      const say = (seatId, name, text) => src.ev.emit('chat', { from: { seatId, name }, text, ts: Date.now() });
+      say('h1', 'maya', 'who invited the shark bot');
+      say(mine, 'lucas', 'it was dev. blame dev');
+      say('h2', 'dev', 'brb, getting snacks — sit me out');
+      src.ev.emit('emote', { from: { seatId: 'h1', name: 'maya' }, id: 'lol' });
+      say('h1', 'maya', 'nice river though');
+    }
+    const results = (mode) => ({
+      reason: 'complete', mode,
+      standings: [
+        { id: 'b3', name: 'neon nina', place: 1, stack: 9000, points: 50 }, { id: 'hero', name: 'lucas', place: 2, stack: 0, points: 30 },
+        { id: 'b1', name: 'bit queen', place: 3, stack: 0, points: 20 }, { id: 'b2', name: 'crt carl', place: 4, stack: 0, points: 0 },
+        { id: 'b4', name: 'pixel pete', place: 5, stack: 0, points: 0 }, { id: 'b5', name: 'synth sue', place: 6, stack: 0, points: 0 },
+      ],
+    });
+    async function joinError(code) {
+      M.join = code;
+      lobby.openJoin('K7QXM');
+      click('[data-key="join-btn"]');
+      await wait(400);
+    }
+
+    const STATES = {
+      hub: () => lobby.openHub(),
+      'join': () => { lobby.openJoin(); },
+      'join-invite': () => { lobby.openJoin('K7QXM'); },
+      'join-busy': async () => { M.join = 'pending'; lobby.openJoin('Q2ZRP'); type('[data-key="join-name"]', 'maya'); click('[data-key="join-btn"]'); await wait(1600); },
+      'join-bad': async () => { lobby.openJoin(); type('[data-key="join-code"]', 'KO0L1'); type('[data-key="join-name"]', 'maya'); click('[data-key="join-btn"]'); },
+      'host-busy': () => { M.createHost = 'pending'; lobby.openHost({ mode: 'cash' }); },
+      'host': () => hostLobby('cash'),
+      'host-sng': async () => { const r = await hostLobby('sng'); r.updateSettings({ mode: 'sng', antes: true }); },
+      'wait': () => clientLobby('maya'),
+      'offline': () => lobby.openOfflineSng(),
+      'game-players': async () => { await cashGame(); click('.mp-tab'); },
+      'game-chat': async () => { const r = await cashGame(); chatter(r, 'hero'); click('.mp-tab:nth-child(2)'); },
+      'game-unread': async () => { const r = await cashGame(); chatter(r, 'hero'); },
+      'sng-bar': async () => { await sngGame(); },
+      'sng-standings': async () => { await sngGame(); click('.mp-tab'); },
+      'elim': async () => { const r = await sngGame(); r.ev.emit('eliminated', { id: 'b4', name: 'pixel pete', place: 5, points: 0 }); await wait(250); },
+      'sitout': async () => { const r = await cashGame(); r.setSittingOut('hero', true); },
+      'client-rebuy': async () => { const c = await clientLobby('maya'); c.startGame(); c.setSeats({ hero: { stack: 0 } }); chatter(c, 'hero'); },
+      'reconnecting': async () => { const c = await clientLobby('maya'); c.startGame(); c.ev.emit('status', 'reconnecting'); },
+      'spectator': async () => { const c = await clientLobby('gran'); c.role = 'spectator'; c.startGame(); },
+      'podium-host': async () => { const r = await sngGame(); r.ev.emit('end', results('sng')); await wait(300); },
+      'podium-client': async () => { const c = await clientLobby('maya'); c.lobby.settings.mode = 'sng'; c.startGame(); c.ev.emit('end', Object.assign(results('sng'), { standings: results('sng').standings.map((s) => (s.id === 'hero' ? Object.assign({}, s, { name: 'maya' }) : s.id === 'b3' ? Object.assign({}, s, { id: 'h2', name: 'lucas' }) : s)) })); await wait(300); },
+      'podium-cash': async () => { const r = await cashGame(); r.ev.emit('end', { reason: 'host-ended', mode: 'cash', standings: [
+        { id: 'b1', name: 'bit queen', place: 1, stack: 1520, points: null }, { id: 'hero', name: 'lucas', place: 2, stack: 1240, points: null },
+        { id: 'h2', name: 'dev', place: 3, stack: 1000, points: null }, { id: 'h1', name: 'maya', place: 4, stack: 860, points: null }, { id: 'b2', name: 'crt carl', place: 5, stack: 380, points: null }] }); await wait(300); },
+      'host-left': async () => { const c = await clientLobby('maya'); c.startGame(); c.ev.emit('closed', { reason: 'host-ended' }); },
+      'err-room-not-found': () => joinError('room-not-found'),
+      'err-network-blocked': () => joinError('network-blocked'),
+      'err-room-full': () => joinError('room-full'),
+      'err-locked': () => joinError('locked'),
+      'err-version-mismatch': () => joinError('version-mismatch'),
+      'err-kicked': () => joinError('kicked'),
+      'err-browser-unsupported': () => joinError('browser-unsupported'),
+      'err-service-unreachable': async () => { M.createHost = 'service-unreachable'; await lobby.openHost({ mode: 'cash' }).catch(() => {}); },
+    };
+    const btns = document.getElementById('pv-buttons');
+    Object.keys(STATES).forEach((k) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = k;
+      b.addEventListener('click', () => { location.search = '?state=' + k; });
+      btns.appendChild(b);
+    });
+    globalThis.PV = { lobby, M, STATES };
+    const st = params.get('state') || 'hub';
+    Promise.resolve((STATES[st] || STATES.hub)()).then(() => { document.body.dataset.pvReady = '1'; }, (e) => { console.error(e); document.body.dataset.pvReady = 'err'; });
+  })();
+  </script>
+</body>
+</html>

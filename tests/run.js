@@ -71,6 +71,9 @@ function listTestFiles(filter) {
     .map((f) => path.join(TEST_DIR, f));
 }
 
+let current = null;   // label of the running test (for the stall guard below)
+let finished = false;
+
 async function runTestFile(ctx, file, failures) {
   const fileName = path.basename(file);
   const start = ctx.TESTS.length;
@@ -88,6 +91,7 @@ async function runTestFile(ctx, file, failures) {
     const label = (t && t.name) || '(unnamed test)';
     try {
       if (!t || typeof t.fn !== 'function') throw new Error('test entry has no fn');
+      current = fileName + ' > ' + label;
       await t.fn();
       passed++;
       process.stdout.write('  ' + COLORS.green + 'PASS' + COLORS.reset + ' ' + label + '\n');
@@ -130,7 +134,17 @@ async function main() {
   const ok = failed === 0 && loadFailures === 0;
   process.stdout.write((ok ? COLORS.green : COLORS.red) + summary + COLORS.reset);
   process.exitCode = ok ? 0 : 1;
+  finished = true;
 }
+
+// A test awaiting a promise that can never settle (deadlock) empties the event loop and Node would
+// exit 0 with the remaining tests silently skipped. Fail loudly instead.
+process.on('beforeExit', () => {
+  if (finished) return;
+  finished = true;
+  process.stdout.write(COLORS.red + '\nSTALLED (never settled): ' + (current || 'harness') + COLORS.reset + '\n');
+  process.exitCode = 1;
+});
 
 process.on('unhandledRejection', (err) => {
   process.stdout.write(COLORS.red + 'Unhandled rejection: ' + (err && err.stack ? err.stack : err) + COLORS.reset + '\n');

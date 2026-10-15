@@ -264,7 +264,7 @@
 
   function sceneFor(screen) {
     if (screen === 'title') return 'title';
-    if (screen === 'stats') return 'room';
+    if (screen === 'stats' || screen === 'mp') return 'room';
     return 'table';
   }
 
@@ -495,11 +495,11 @@
     const plate = el('div', 'seat-plate');
     const head = el('div', 'seat-head');
     const badge = el('span', 'seat-badge');
-    const av = avatar(p.name);
+    const av = avatar(meta.avatar ? p.name + '|' + meta.avatar : p.name);
     head.append(av, el('span', 'seat-name', isHero ? 'you' : seatName(p.name)), badge);
     const stack = el('div', 'seat-stack', chips(p.stack));
     const sub = el('div', 'seat-sub');
-    if (!isHero) sub.appendChild(stars(meta.rating || 0));
+    if (!isHero) sub.appendChild(meta.kind === 'human' || meta.kind === 'host' ? el('span', 'seat-tag', 'player') : stars(meta.rating || 0));
     const timer = el('div', 'seat-timer');
     timer.appendChild(el('i'));
     plate.append(head, stack, sub, timer);
@@ -554,6 +554,13 @@
     seatsLayer.appendChild(dealer);
     clear(byId('fx-layer'));
     resetHand();
+  }
+
+  /** Presence on a seat in net games: 'online'|'away'|'offline'|'sittingOut'|null (CSS in multiplayer.css). */
+  function setSeatStatus(id, status) {
+    const s = T.seats.get(id);
+    if (!s) return;
+    ['away', 'offline', 'sittingOut'].forEach((k) => s.root.classList.toggle('mp-' + k, status === k));
   }
 
   function resetHand() {
@@ -1791,7 +1798,7 @@
     // background + effects
     startBackground, setMood, shake, stamp, floatText, flyChips, celebrate, tick,
     // table
-    buildTable, resetHand, renderView, dealHoles, revealHole, gatherBets, showAction, showBubble,
+    buildTable, resetHand, setSeatStatus, renderView, dealHoles, revealHole, gatherBets, showAction, showBubble,
     clearBubbles, showHandLabel, setHeroRead, startTimer, stopTimers,
     // human input
     setActionMode, requestHumanAction, triggerAction, adjustRaise, isAwaitingHuman, cancelHumanAction,
