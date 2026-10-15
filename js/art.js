@@ -145,7 +145,7 @@
   const CARD_SIZE = { M: { w: 24, h: 34 }, S: { w: 14, h: 19 } };
 
   function cardShape(p, x, y, w, h, paper, drop) {
-    if (drop) p.rect(x + 1, y + h, w - 1, drop, col('room'));
+    if (drop) p.rect(x + 1, y + h, w - 1, drop, col('shade'));
     p.rect(x + 1, y, w - 2, h, paper);
     p.rect(x, y + 1, w, h - 2, paper);
     p.rect(x + w - 1, y + 1, 1, h - 2, col('paper-shade'));
@@ -216,7 +216,7 @@
   function drawTower(p, x, base, types) {
     const n = types.length;
     if (!n) return;
-    p.rect(x, base, CHIP_W, 1, col('room'));
+    p.rect(x, base, CHIP_W, 1, col('shade'));
     for (let i = 0; i < n; i++) {
       const t = CHIP[types[i]];
       const y = base - (i + 1) * CHIP_E;
@@ -311,20 +311,20 @@
   const SCENES = {
     table: {
       table: { cx: 168, cy: 128, rx: 148, ry: 88, rail: 8, wear: { x: 122, y: 108 } },
-      pool: { cx: 201, cy: 162, aspect: 1.3, r1: 58, r2: 100 },
-      spill: { cx: 196, cy: 150, aspect: 1.5, r1: 150, r2: 215 },
+      pool: { cx: 190, cy: 140, aspect: 1.45, r1: 78, r2: 128 },
+      spill: { cx: 196, cy: 150, aspect: 1.5, r1: 190, r2: 270 },
       smoke: { cx: 201, half0: 40, slope: 0.36, skip: (x, y) => (x >= 336 && y < 259) || y >= 258 },
     },
     title: {
       table: { cx: 334, cy: 238, rx: 196, ry: 100, rail: 9, wear: { x: 254, y: 168 } },
-      pool: { cx: 304, cy: 206, aspect: 1.3, r1: 62, r2: 108 },
-      spill: { cx: 316, cy: 214, aspect: 1.5, r1: 140, r2: 200 },
+      pool: { cx: 304, cy: 206, aspect: 1.45, r1: 84, r2: 136 },
+      spill: { cx: 300, cy: 190, aspect: 1.5, r1: 190, r2: 270 },
       smoke: { cx: 304, half0: 44, slope: 0.4, skip: (x, y) => x < 150 && y > 90 },
     },
     room: {
       table: null,
-      pool: { cx: 240, cy: 150, aspect: 1.3, r1: 70, r2: 130 },
-      spill: { cx: 240, cy: 140, aspect: 1.5, r1: 160, r2: 240 },
+      pool: { cx: 240, cy: 150, aspect: 1.45, r1: 100, r2: 160 },
+      spill: { cx: 240, cy: 140, aspect: 1.5, r1: 200, r2: 290 },
       smoke: { cx: 240, half0: 60, slope: 0.4, skip: null },
     },
   };
@@ -485,7 +485,7 @@
     ctx.translate(ox, oy);
     if (on) {
       drawBack(ctx, 'M', 222, 184);
-      p.rect(245, 178 + 34, 23, 2, col('room'));
+      p.rect(245, 178 + 34, 23, 2, col('shade'));
       drawCard(ctx, { r: 13, s: 'h' }, 'M', mood === 'calm' ? col('paper') : col('paper-2'), 244, 178);
       drawTower(p, 404, 240, ['k', 'r', 'r', 'b', 'r', 'k', 'r']);
       drawTower(p, 420, 246, ['b', 'b', 'r', 'i']);
@@ -495,7 +495,7 @@
     const { x, y, w, h } = TITLE_SLIP;
     const paper = mood === 'calm' ? col('paper') : mood === 'out' ? '#3a3127' : col('paper-2');
     const shade = mood === 'out' ? '#2a231c' : col('paper-shade');
-    p.rect(x + 1, y + h, w - 1, 2, col('room'));
+    p.rect(x + 1, y + h, w - 1, 2, col('shade'));
     p.rect(x + 1, y, w - 2, h, paper); p.rect(x, y + 1, w, h - 2, paper);
     p.rect(x + w - 1, y + 1, 1, h - 2, shade); p.rect(x + 1, y + h - 1, w - 2, 1, shade);
     for (let i = 1; i < w - 1; i += 3) p.rect(x + i, y + 2, 1, 1, shade);
@@ -503,7 +503,7 @@
     const ry = y + 104 - 25;
     p.rect(x + 6, ry - 1, w - 6, 2, on ? col('price-ink') : shade);
     if (on) {
-      p.rect(x + w, ry - 1, 3, 2, col('price')); p.rect(x + w, ry + 1, 3, 1, col('room'));
+      p.rect(x + w, ry - 1, 3, 2, col('price')); p.rect(x + w, ry + 1, 3, 1, col('shade'));
       text(ctx, '25', x + w + 5, ry - 21, 2, col('price'));
       text(ctx, '%', x + w + 33, ry - 9, 1, col('price'));
     }
@@ -514,7 +514,7 @@
     const dark = mood === 'out';
     const rim = dark ? '#2a221c' : col('chip-bone-lo'), well = dark ? '#16110d' : '#3a302a', ash = dark ? '#221c17' : '#6e655c';
     p.rect(x + 3, y - 2, 16, 1, rim); p.rect(x + 1, y - 1, 20, 1, rim); p.rect(x, y, 22, 4, rim);
-    p.rect(x + 1, y + 4, 20, 1, dark ? '#1a1410' : col('chip-red-lo')); p.rect(x + 2, y + 5, 18, 1, col('room'));
+    p.rect(x + 1, y + 4, 20, 1, dark ? '#1a1410' : col('chip-red-lo')); p.rect(x + 2, y + 5, 18, 1, col('shade'));
     p.rect(x + 3, y - 1, 16, 1, well); p.rect(x + 2, y, 18, 2, well);
     p.px(x + 7, y + 1, ash); p.px(x + 8, y, ash); p.px(x + 11, y + 1, ash); p.px(x + 6, y, ash);
     p.rect(x + 14, y - 2, 7, 1, dark ? '#4a4034' : col('paper')); p.rect(x + 14, y - 2, 2, 1, dark ? '#3a2a1a' : col('chip-bone'));
@@ -540,7 +540,7 @@
     const p = pen(ctx);
     const { w, h } = SLIP;
     ctx.clearRect(0, 0, w, h + 2);
-    p.rect(1, h, w - 1, 2, col('room'));
+    p.rect(1, h, w - 1, 2, col('shade'));
     p.rect(1, 0, w - 2, h, col('paper')); p.rect(0, 1, w, h - 2, col('paper'));
     p.rect(w - 1, 1, 1, h - 2, col('paper-shade')); p.rect(1, h - 1, w - 2, 1, col('paper-shade'));
     for (let i = 1; i < w - 1; i += 3) p.rect(i, 2, 1, 1, col('paper-shade'));

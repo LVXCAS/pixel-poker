@@ -7,9 +7,10 @@
   --t-room: var(--room, #0e0806);
   --t-slate: var(--slate, #1d2824);
   --t-slate-2: #23302b;
+  /* reading-text tones are owned here: chalk 13.6:1 and dim 8.4:1 on the slate (secondary >= 4.5, body >= 7) */
   --t-ghost: #2b3a34;
-  --t-chalk: var(--chalk, #e9e6d6);
-  --t-chalk-dim: var(--chalk-dim, #939e94);
+  --t-chalk: #f4f1e4;
+  --t-chalk-dim: #bcc4b6;
   --t-chalk-red: #e48c76;
   --t-wood: var(--wood, #4f2f1c);
   --t-wood-hi: var(--wood-hi, #73452a);
@@ -20,8 +21,8 @@
   --t-price: var(--price, #ff9f6b);
   --t-text: var(--text, #f0e3c8);
   --t-u: var(--u, 2px);
-  --t-fs: 22px;
-  --t-lh: 1.36;
+  --t-fs: 26px;
+  --t-lh: 1.32;
   position: fixed;
   inset: 0;
   z-index: 400; /* above the app, under modals (500) and the CRT layer */
@@ -34,15 +35,15 @@
 }
 .tut-root[hidden] { display: none; }
 @media (max-width: 1279px), (max-height: 759px) {
-  .tut-root { --t-fs: 16.5px; }
+  .tut-root { --t-fs: 21px; }
 }
 
 /* ------------------------------------------------------------- the room dims; one pool stays lit */
 .tut-dim {
   position: fixed;
   display: none;
-  /* two hard steps, like the bulb's bands: a half-lit ring, then the dark room */
-  box-shadow: 0 0 0 8px rgba(14, 8, 6, 0.38), 0 0 0 9999px rgba(14, 8, 6, 0.7);
+  /* the room stays lit: a light 20% shade outside, a warm lamp-lit halo round the object */
+  box-shadow: 0 0 0 4px rgba(255, 214, 150, 0.22), 0 0 0 9999px rgba(30, 16, 8, 0.2);
 }
 .tut-dim.on { display: block; }
 
@@ -51,10 +52,7 @@
 .tut-ring i {
   position: absolute;
   background: var(--t-chalk);
-  -webkit-mask-image: var(--tut-chalk-mask);
-  mask-image: var(--tut-chalk-mask);
-  -webkit-mask-size: 24px 24px;
-  mask-size: 24px 24px;
+  box-shadow: 0 0 0 1px rgba(20, 12, 8, 0.55);
 }
 .tut-ring .t { left: -7px; right: -3px; top: 0; height: 3px; }
 .tut-ring .b { left: -2px; right: -8px; bottom: 0; height: 3px; transform: translateY(1px); }
@@ -68,7 +66,7 @@
 /* ------------------------------------------------------------- leader: one hairline from slate to object */
 .tut-lead { display: none; }
 .tut-lead.on { display: block; }
-.tut-lead i { position: fixed; background: var(--t-text); opacity: 0.85; }
+.tut-lead i { position: fixed; background: var(--t-chalk); box-shadow: 0 0 0 1px rgba(20, 12, 8, 0.5); }
 .tut-lead .h { height: 2px; }
 .tut-lead .v { width: 2px; }
 
@@ -79,8 +77,8 @@
   position: fixed;
   background:
     /* eraser smear: where the last lesson was wiped */
-    repeating-linear-gradient(176deg, transparent 0 46px, rgba(43, 58, 52, 0.55) 46px 49px, transparent 49px 97px),
-    repeating-linear-gradient(93deg, transparent 0 13px, rgba(35, 48, 43, 0.9) 13px 15px, transparent 15px 41px),
+    repeating-linear-gradient(176deg, transparent 0 46px, rgba(43, 58, 52, 0.35) 46px 49px, transparent 49px 97px),
+    repeating-linear-gradient(93deg, transparent 0 13px, rgba(35, 48, 43, 0.5) 13px 15px, transparent 15px 41px),
     var(--t-slate);
   border: 4px solid var(--t-wood);
   /* stepped frame: highlight, wood, shadow line, then a 2u drop onto the room */
@@ -93,7 +91,7 @@
   color: var(--t-chalk);
 }
 .tut-dealer {
-  width: min(31em, calc(100vw - 32px));
+  width: min(23em, 42vw, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
   overflow: auto;
   padding: 0.7em 0.9em 0.8em;
@@ -101,7 +99,7 @@
   top: 16px;
 }
 .tut-dealer[hidden] { display: none; }
-.tut-dealer.wide { width: min(36em, calc(100vw - 32px)); }
+.tut-dealer.wide { width: min(34em, 47vw, calc(100vw - 32px)); } /* fits beside the felt, clear of board + hero cards */
 .tut-dealer.centered { left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); }
 .tut-dealer.in { animation: tut-chalk-in 150ms steps(3, end) both; }
 @keyframes tut-chalk-in { from { opacity: 0; } to { opacity: 1; } }
@@ -110,7 +108,7 @@
   display: flex;
   justify-content: space-between;
   gap: 1em;
-  font-size: 0.75em;
+  font-size: 0.72em;
   color: var(--t-chalk-dim);
   padding-bottom: 0.35em;
   margin-bottom: 0.5em;
@@ -118,29 +116,13 @@
   background: linear-gradient(90deg, var(--t-chalk-dim) 0 37%, transparent 37% 39%, var(--t-chalk-dim) 39% 81%, transparent 81% 82%, var(--t-chalk-dim) 82%) bottom / 100% 2px no-repeat;
 }
 .tut-voice { letter-spacing: 0.08em; }
-.tut-title,
-.tut-tier h3 {
+.tut-title {
   -webkit-mask-image: var(--tut-chalk-mask);
   mask-image: var(--tut-chalk-mask);
   -webkit-mask-size: 24px 24px;
   mask-size: 24px 24px;
 }
-.tut-voice,
-.tut-say,
-.tut-prompt,
-.tut-verdict,
-.tut-sub,
-.tut-note,
-.tut-choice button,
-.tut-rung button,
-.tut-lesson button,
-.tut-tier li,
-.tut-label {
-  -webkit-mask-image: var(--tut-chalk-light);
-  mask-image: var(--tut-chalk-light);
-  -webkit-mask-size: 24px 24px;
-  mask-size: 24px 24px;
-}
+/* reading text is crisp solid pixels: no knockout below display size */
 /* the house voice is lowercase chalk; names in the copy keep their capitals */
 .tut-btn,
 .tut-head,
@@ -167,8 +149,7 @@
 }
 .tut-btn kbd {
   font: inherit;
-  font-size: 0.7em;
-  opacity: 0.7;
+  font-size: 0.72em;
   background: none;
   border: 0;
   padding: 0;
@@ -208,9 +189,9 @@
   text-align: left;
   width: 100%;
 }
-.tut-choice kbd { font: inherit; font-size: 0.75em; color: var(--t-chalk-dim); background: none; border: 0; padding: 0; }
+.tut-choice kbd { font: inherit; font-size: 0.8em; color: var(--t-chalk-dim); background: none; border: 0; padding: 0; }
 .tut-choice button:hover span { text-decoration: underline 2px; text-underline-offset: 4px; }
-.tut-choice.struck button { color: var(--t-chalk-red); cursor: default; }
+.tut-choice.struck button { color: var(--t-chalk-red); cursor: default; } /* #e48c76: 6.4:1 on slate */
 .tut-choice.struck span { text-decoration: line-through 2px; }
 .tut-choice.right span {
   padding: 0 0.3em;
@@ -261,8 +242,9 @@
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 58% 64% at 50% 42%, transparent 0 60%, rgba(14, 8, 6, 0.55) 60% 78%, rgba(14, 8, 6, 0.85) 78%),
-    var(--room-2, #1a0f0a);
+    /* a lit card room: warm lamp pool in stepped bands, never darker than ~25% shade at the edges */
+    radial-gradient(ellipse 58% 64% at 50% 42%, transparent 0 60%, rgba(20, 10, 6, 0.12) 60% 78%, rgba(20, 10, 6, 0.24) 78%),
+    #5a3a26;
   display: grid;
   place-items: center;
   padding: 16px;
@@ -322,7 +304,7 @@
 }
 .tut-rung-name { margin: 0 0 0.6em; font-weight: 400; font-size: 1.4em; }
 .tut-rung-note { margin: 0.8em 0 0.3em; }
-.tut-rung-rank { margin: 0; color: #6d5a42; font-size: 0.8em; }
+.tut-rung-rank { margin: 0; color: #5a4632; font-size: 0.85em; }
 
 /* hands laid out for questions */
 .tut-hands { display: flex; flex-wrap: wrap; gap: 1em 2.2em; align-items: flex-end; }
@@ -340,7 +322,7 @@
 .tut-tier ul { list-style: none; margin: 0; padding: 0; }
 .tut-tier li { padding: 0.08em 0; }
 .tut-tier:first-child h3 { color: var(--t-price); border-color: var(--t-price); }
-.tut-tier:last-child li { color: var(--t-chalk-dim); text-decoration: line-through 2px; }
+.tut-tier:last-child li { color: var(--t-chalk-dim); text-decoration: line-through 2px var(--t-chalk-red); }
 
 /* lesson list */
 .tut-lessons { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
@@ -350,7 +332,7 @@
 }
 .tut-lesson button:hover { background: linear-gradient(90deg, var(--t-ghost), transparent 92%); }
 .tut-lesson .n { color: var(--t-chalk-dim); }
-.tut-lesson .d { color: var(--t-chalk-dim); font-size: 0.8em; }
+.tut-lesson .d { color: var(--t-chalk-dim); font-size: 0.85em; }
 .tut-lesson .st { font-size: 0.75em; text-align: right; color: var(--t-chalk-dim); }
 .tut-lesson.done .t { text-decoration: line-through 2px var(--t-chalk-dim); color: var(--t-chalk-dim); }
 .tut-lesson.next .n,

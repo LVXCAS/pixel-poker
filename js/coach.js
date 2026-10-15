@@ -390,7 +390,11 @@
     return null;
   }
 
-  function tierSentence(s) {
+  function tierSentence(s, rec) {
+    const playingWeakHand = rec && (rec.type === 'raise' || rec.type === 'bet') && TIER_RANK[s.tier] <= TIER_RANK.Marginal;
+    if (playingWeakHand && rec.concept === 'position') {
+      return `${s.label} is only ${s.tier} on its own, but it's folded to you on the Button — a raise here wins the blinds often enough to profit with almost any two cards.`;
+    }
     if (s.effTier && s.effTier !== s.tier) {
       const table = s.view.players.filter((p) => !p.out).length <= 2 ? 'Heads-up' : 'Three-handed';
       return `${s.label} is only ${s.tier} at a full table, but ${table.toLowerCase()} it plays like a ${s.effTier} hand — with so few opponents, average hands win far more often.`;
@@ -400,7 +404,7 @@
 
   function preflopReasons(s, rec) {
     const facingRaise = (s.view.currentBet || 0) > s.bb;
-    const out = [tierSentence(s)];
+    const out = [tierSentence(s, rec)];
     if (facingRaise) out.push(`Someone raised to ${(s.view.currentBet / s.bb).toFixed(1)} BB — raisers usually hold stronger-than-average hands.`);
     out.push(POSITION_TIP[s.position]);
     const note = preflopHandNote(s, facingRaise);

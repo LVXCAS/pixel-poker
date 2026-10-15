@@ -269,3 +269,22 @@
   });
 
 })();
+
+/* Regression: a Button steal with a weak hand must not be explained as "folding saves money". */
+(function () {
+  const { Coach, Cards } = PP;
+  TESTS.push({ name: 'coach: button steal reason does not contradict the raise', fn: () => {
+    const hole = Cards.parseMany('7s 5h');
+    const players = [0, 1, 2, 3].map((i) => ({
+      id: i === 0 ? 'hero' : 'v' + i, name: 'P' + i, seat: i, stack: 1000, bet: i === 1 ? 10 : i === 2 ? 20 : 0,
+      totalBet: 0, folded: i === 3, allIn: false, out: false, isHuman: i === 0, lastAction: null, hole: i === 0 ? hole : null,
+    }));
+    const view = { handNumber: 1, street: 'preflop', board: [], pot: 30, pots: [], currentBet: 20, minRaiseTo: 40,
+      bigBlind: 20, smallBlind: 10, dealerSeat: 0, sbSeat: 1, bbSeat: 2, toActId: 'hero', players, history: [] };
+    const legal = { canFold: true, canCheck: false, canCall: true, callAmount: 20, toCall: 20, canBet: false, canRaise: true, minRaiseTo: 40, maxRaiseTo: 1000 };
+    const adv = Coach.advise(view, legal, 'hero', { iterations: 2000, rng: Cards.seededRng(3) });
+    if (adv.recommendation.type !== 'raise') return; // only the steal case is under test
+    const text = adv.reasons.join(' | ');
+    assert.ok(!/folding it saves money/.test(text), text);
+  } });
+})();

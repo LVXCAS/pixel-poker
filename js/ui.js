@@ -32,6 +32,7 @@
   const ACTION_LABEL = { fold: 'FOLD', check: 'CHECK', call: 'CALL', bet: 'BET', raise: 'RAISE', allin: 'ALL IN' };
   const SHORT_VERB = { fold: 'fold', check: 'check', call: 'call', bet: 'bet', raise: 'raise', allin: 'all in', blind: '' };
   const DMD_VERB = { fold: 'FOLDS', check: 'CHECKS', call: 'CALLS', bet: 'BETS', raise: 'RAISES', allin: 'ALL IN' };
+  const DMD_VERB_YOU = { fold: 'FOLD', check: 'CHECK', call: 'CALL', bet: 'BET', raise: 'RAISE', allin: 'ALL IN' };
   const GRADE_CLASS = { GREAT: 'great', GOOD: 'good', OK: 'ok', MISTAKE: 'mistake', BLUNDER: 'blunder' };
   const CONCEPT_TAG = {
     impliedOdds: 'implied odds', semiBluff: 'semi-bluff', value: 'value', position: 'position',
@@ -825,7 +826,8 @@
     showBubble(playerId, actionText({ type, amount }), type);
     const name = playerId === T.heroId ? 'YOU' : seatName((T.view && (T.view.players || []).find((p) => p.id === playerId) || {}).name || '');
     const amt = amount > 0 && type !== 'fold' && type !== 'check' ? ' ' + chips(amount) : '';
-    DM.last = (name + ' ' + (DMD_VERB[type] || String(type).toUpperCase()) + amt).trim();
+    const verbs = playerId === T.heroId ? DMD_VERB_YOU : DMD_VERB;
+    DM.last = (name + ' ' + (verbs[type] || String(type).toUpperCase()) + amt).trim();
     updateDMD();
   }
 
@@ -1231,9 +1233,13 @@
     return toCall > 0 ? 'call ' + chips(toCall) + ' · pot ' + chips(pot) : 'check is free · pot ' + chips(pot);
   }
 
+  // The coach slate fits ~19 characters a line; short seat words keep the hand line on one row.
+  const SHORT_POSITION = { button: 'btn', middle: 'mid', blinds: 'blinds', late: 'late', early: 'early' };
+  function shortPosition(pos) { const k = String(pos).toLowerCase(); return SHORT_POSITION[k] || k; }
+
   function handLine(a) {
     if (a.street === 'preflop' || !a.made) {
-      return [a.holeLabel, a.preflopTier && String(a.preflopTier).toLowerCase(), a.position && String(a.position).toLowerCase()].filter(Boolean).join(' · ');
+      return [a.holeLabel, a.preflopTier && String(a.preflopTier).toLowerCase(), a.position && shortPosition(a.position)].filter(Boolean).join(' · ');
     }
     const outs = a.outs && (typeof a.outs === 'number' ? a.outs : a.outs.count);
     return String(a.made).toLowerCase().replace(/,.*$/, '') + (outs ? ' · ' + outs + ' outs' : '');

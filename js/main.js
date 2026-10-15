@@ -33,7 +33,13 @@
     { id: 'mixed', label: 'MIXED' }, { id: 'winner', label: 'WHO WINS' }, { id: 'nameHand', label: 'NAME IT' },
     { id: 'potOdds', label: 'POT ODDS' }, { id: 'outs', label: 'OUTS' },
   ];
-  const VERBS = { fold: 'folds', check: 'checks', call: 'calls', bet: 'bets', raise: 'raises to', allin: 'goes ALL IN' };
+  const VERBS = { fold: 'folds', check: 'checks', call: 'calls', bet: 'bets', raise: 'raises to', allin: 'goes ALL IN', post: 'posts', show: 'shows', win: 'wins' };
+  const HERO_VERBS = { fold: 'fold', check: 'check', call: 'call', bet: 'bet', raise: 'raise to', allin: 'go ALL IN', post: 'post', show: 'show', win: 'win' };
+  /** Log verb agreeing with its subject: "you call", "vic calls". */
+  function verbFor(id, type) {
+    const table = id === HERO_ID ? HERO_VERBS : VERBS;
+    return table[type] || type;
+  }
   const REQUIRED_MODULES = ['Cards', 'Eval', 'Equity', 'Engine', 'Bots', 'Coach'];
 
   // -------------------------------------------------------------------- storage
@@ -448,7 +454,7 @@
     (p.posts || []).forEach((post) => {
       const kind = String(post.kind || 'blind').toUpperCase();
       UI.showBubble(post.playerId, kind + ' ' + UI.money(post.amount), 'blind');
-      UI.log([who(g, post.playerId), ' posts ' + kind + ' ' + UI.money(post.amount)], 'dim');
+      UI.log([who(g, post.playerId), ' ' + verbFor(post.playerId, 'post') + ' ' + kind + ' ' + UI.money(post.amount)], 'dim');
     });
     UI.renderView(viewOf(g));
     await UI.wait(DELAY.blinds);
@@ -472,7 +478,7 @@
     UI.showAction(p.playerId, p.type, p.amount);
     UI.renderView(viewOf(g));
     const amt = p.type === 'fold' || p.type === 'check' ? '' : ' ' + UI.money(p.amount);
-    UI.log([who(g, p.playerId), ' ' + (VERBS[p.type] || p.type) + amt], 'act act-' + p.type);
+    UI.log([who(g, p.playerId), ' ' + verbFor(p.playerId, p.type) + amt], 'act act-' + p.type);
     if (p.playerId === HERO_ID && p.type === 'fold') g.hand.heroFolded = true;
     if (p.type === 'allin') {
       const big = (p.amount || 0) >= BIG_ALLIN_BB * g.bb;
@@ -496,24 +502,38 @@
   async function onShowdown(g, p) {
     await UI.gatherBets();
     UI.clearBubbles();
+    g.hand = { ...g.hand, shown: (p.reveals || []).filter((r) => r.hand).map((r) => r.playerId) };
     (p.reveals || []).forEach((r) => {
       UI.revealHole(r.playerId, r.hole);
       const name = r.hand && (r.hand.catName || r.hand.desc);
       UI.showHandLabel(r.playerId, name ? String(name).toUpperCase() : '');
-      UI.log([who(g, r.playerId), ' shows ', { t: UI.cardsText(r.hole), c: 'cards' }, r.hand ? ' - ' + r.hand.desc : ''], 'show');
+      UI.log([who(g, r.playerId), ' ' + verbFor(r.playerId, 'show') + ' ', { t: UI.cardsText(r.hole), c: 'cards' }, r.hand ? ' - ' + r.hand.desc : ''], 'show');
     });
     UI.renderView(viewOf(g));
     await UI.wait(DELAY.showdown);
   }
 
+  /** The slate after the pot is pushed: the result, never the stale "watching" line. */
+  function handResultCoach(g, awards) {
+    const heroWon = awards.filter((a) => a.playerId === HERO_ID).reduce((t, a) => t + (a.amount || 0), 0);
+    const top = awards.reduce((b, a) => (!b || (a.amount || 0) > (b.amount || 0) ? a : b), null);
+    const next = 'Review the hand, or deal the next one.';
+    if (heroWon > 0) return { title: 'YOU WON', message: 'You took ' + UI.money(heroWon) + '. ' + next };
+    if (top) return { title: 'HAND OVER', message: nameOf(g, top.playerId) + ' took ' + UI.money(top.amount) + '. ' + next };
+    return { title: 'HAND OVER', message: next };
+  }
+
   async function onPotAwarded(g, p) {
     await UI.gatherBets();
     const awards = p.awards || [];
+    UI.renderCoach(null, coachOptions(handResultCoach(g, awards)));
     UI.celebrate(awards);
     UI.renderView(viewOf(g));
     awards.forEach((a) => {
-      const how = a.hand ? ' with ' + a.hand.desc : '';
-      UI.log([who(g, a.playerId), ' wins ' + UI.money(a.amount) + how], 'win');
+      // The showdown line already named the hand; don't say it twice.
+      const shown = (g.hand.shown || []).includes(a.playerId);
+      const how = a.hand && !shown ? ' with ' + a.hand.desc : '';
+      UI.log([who(g, a.playerId), ' ' + verbFor(a.playerId, 'win') + ' ' + UI.money(a.amount) + how], 'win');
       if (a.playerId === HERO_ID && a.amount > 0) {
         UI.setMood('win');
         if (a.amount >= BIG_WIN_BB * g.bb) UI.stamp('BIG POT!', 'win', a.playerId);
@@ -643,7 +663,7 @@
       if (choice === 'rebuy') {
         g.engine.addChips(HERO_ID, g.stack);
         UI.renderView(viewOf(g));
-        UI.log([who(g, HERO_ID), ' rebuys for ' + UI.money(g.stack)], 'win');
+        UI.log([who(g, HERO_ID), ' rebuy for ' + UI.money(g.stack)], 'win');
         return true;
       }
       endGame();
@@ -808,8 +828,9 @@
   function renderDrillScore() {
     const root = UI.clear(UI.byId('drill-score'));
     const acc = drill.total ? Math.round((drill.correct / drill.total) * 100) + '%' : '--';
-    [['STREAK', drill.streak], ['SCORE', drill.correct + '/' + drill.total], ['ACCURACY', acc], ['BEST', stats.bestStreak]].forEach(([k, v]) => {
-      const tile = UI.el('div', 'score-tile');
+    // Two short tiles share the first row; the wider ones get a full row each so nothing collides.
+    [['STREAK', drill.streak], ['BEST', stats.bestStreak], ['SCORE', drill.correct + '/' + drill.total, 'wide'], ['ACCURACY', acc, 'wide']].forEach(([k, v, mod]) => {
+      const tile = UI.el('div', 'score-tile' + (mod ? ' ' + mod : ''));
       tile.append(UI.el('span', 'score-k', k), UI.el('span', 'score-v', v));
       root.appendChild(tile);
     });

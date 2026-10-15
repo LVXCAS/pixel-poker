@@ -8,6 +8,10 @@
  *   bet, raise      -> player's total street bet after the action ("raise to")
  *   allin           -> player's total street bet after the action
  *
+ * Multiplayer additions (MULTIPLAYER.md 6.1):
+ *   endWhenHumanBusts: false   isGameOver() ignores the "human busted" rule (default true).
+ *   setBlinds(sb, bb, ante)    change forced bets between hands; false while a hand runs.
+ *
  * Optional constructor extension (non-contract, for tests/replays):
  *   deckFn(handNumber) -> Card[]   ordered deck; cards are drawn from index 0.
  *   deck: Card[52]                 preset deck (52 unique cards) used for every hand instead of
@@ -64,6 +68,7 @@
       this.smallBlind = Math.max(1, toChips(o.smallBlind) || 1);
       this.bigBlind = Math.max(this.smallBlind, toChips(o.bigBlind) || this.smallBlind * 2);
       this.ante = toChips(o.ante);
+      this.endWhenHumanBusts = o.endWhenHumanBusts !== false;
       this.rng = typeof o.rng === 'function' ? o.rng : null;
       this.deckFn = typeof o.deckFn === 'function' ? o.deckFn : null;
       this.presetDeck = o.deck != null ? validPresetDeck(o.deck) : null;
@@ -176,9 +181,21 @@
     /* --------------------------------------------------------- public API */
 
     isGameOver() {
-      const hero = this.players.find((p) => p.isHuman);
+      const hero = this.endWhenHumanBusts ? this.players.find((p) => p.isHuman) : null;
       if (hero && hero.stack + hero.totalBet <= 0) return true;
       return this.players.filter((p) => p.stack + p.totalBet > 0).length <= 1;
+    }
+
+    /**
+     * Change the forced bets between hands (tournament levels). Rejected while a hand is
+     * running; otherwise applies from the next hand's postForcedBets.
+     */
+    setBlinds(smallBlind, bigBlind, ante = this.ante) {
+      if (this.inHand) return false;
+      this.smallBlind = Math.max(1, toChips(smallBlind));
+      this.bigBlind = Math.max(this.smallBlind, toChips(bigBlind) || this.smallBlind * 2);
+      this.ante = toChips(ante);
+      return true;
     }
 
     addChips(playerId, amount) {

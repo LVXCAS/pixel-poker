@@ -473,31 +473,46 @@
     placeDealer(u);
   }
 
-  function overlaps(a, b) { return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top; }
 
-  /** Park the slate in a corner of the table stage that covers neither the target nor the action bar. */
+  /** Overlap area of two rects (0 when apart). */
+  function overlapArea(a, b) {
+    const w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+    const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+    return w > 0 && h > 0 ? w * h : 0;
+  }
+  function rectOf(sel) {
+    const n = typeof sel === 'string' ? document.querySelector(sel) : sel;
+    const r = n && n.getClientRects().length ? n.getBoundingClientRect() : null;
+    return r && r.width > 0 ? r : null;
+  }
+
+  /**
+   * Park the slate where it covers the least of what matters, re-chosen every step: the ringed object,
+   * the board, the hero's cards and the action bar are hard no-go zones; other seats are a soft cost.
+   */
   function placeDealer(u) {
     const d = O.dealer;
     if (d.hidden || d.classList.contains('centered')) { O.lead.classList.remove('on'); return; }
-    const stage = document.getElementById('table-stage');
-    const bar = document.getElementById('action-bar');
-    const area = stage && stage.getBoundingClientRect().width ? stage.getBoundingClientRect() : { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
-    const avoid = [u, bar && bar.getBoundingClientRect()].filter(Boolean);
+    const bar = rectOf('#action-bar');
     const w = d.offsetWidth;
     const h = d.offsetHeight;
     const m = 12;
-    const bottomLimit = bar ? Math.min(area.bottom, bar.getBoundingClientRect().top) : area.bottom;
-    const spots = [
-      { left: area.left + m, top: area.top + m }, { left: area.right - w - m, top: area.top + m },
-      { left: area.left + m, top: bottomLimit - h - m }, { left: area.right - w - m, top: bottomLimit - h - m },
-    ].map((p) => ({ ...p, right: p.left + w, bottom: p.top + h }));
-    const score = (p) => avoid.reduce((s, r) => s + (overlaps(p, r) ? 1 : 0), 0);
-    const best = spots.slice().sort((a, b) => score(a) - score(b))[0];
-    const left = Math.max(m, Math.min(innerWidth - w - m, best.left));
-    const top = Math.max(m, Math.min(innerHeight - h - m, best.top));
-    d.style.left = left + 'px';
-    d.style.top = top + 'px';
-    drawLead({ left, top, right: left + w, bottom: top + h }, u);
+    const bottomLimit = bar ? Math.max(h + 2 * m, bar.top) : innerHeight;
+    const hard = [u, rectOf('#board'), rectOf(HERO_CARDS), bar].filter(Boolean);
+    const soft = Array.from(document.querySelectorAll('.seat:not(.hero)')).map(rectOf).filter(Boolean);
+    const xs = [innerWidth - w - m, m, (innerWidth - w) / 2];
+    const ys = [m, bottomLimit - h - m, (bottomLimit - h) / 2];
+    const spots = [];
+    ys.forEach((y) => xs.forEach((x) => {
+      const left = Math.max(m, Math.min(innerWidth - w - m, x));
+      const top = Math.max(m, Math.min(innerHeight - h - m, y));
+      spots.push({ left, top, right: left + w, bottom: top + h });
+    }));
+    const score = (p) => hard.reduce((s, r) => s + overlapArea(p, r) * 100, 0) + soft.reduce((s, r) => s + overlapArea(p, r), 0);
+    const best = spots.reduce((acc, p) => (score(p) < score(acc) ? p : acc), spots[0]);
+    d.style.left = best.left + 'px';
+    d.style.top = best.top + 'px';
+    drawLead(best, u);
   }
 
   /** A 1u leader line, horizontal then vertical, from the slate to the ringed object. */
@@ -527,9 +542,9 @@
     d.classList.toggle('centered', !!opts.centered);
     d.classList.toggle('wide', !!opts.wide);
     const head = el('header', 'tut-head');
-    head.append(el('span', 'tut-voice chalk-text', 'DEALER'), el('span', 'tut-where chalk-text', opts.head || ''));
+    head.append(el('span', 'tut-voice', 'DEALER'), el('span', 'tut-where', opts.head || ''));
     d.append(head);
-    if (opts.say) d.append(el('p', 'tut-say chalk-text', opts.say));
+    if (opts.say) d.append(el('p', 'tut-say', opts.say));
     if (opts.body) d.append(opts.body);
     d.hidden = false;
     O.root.hidden = false;
@@ -572,9 +587,9 @@
   /** Blocking multiple choice. Wrong picks get a chalk strike and stay wrong; resolves on the right one. */
   function question(container, q, onRight) {
     const box = el('div', 'tut-q');
-    box.append(el('p', 'tut-prompt chalk-text', q.prompt));
+    box.append(el('p', 'tut-prompt', q.prompt));
     const list = el('ol', 'tut-choices');
-    const verdict = el('p', 'tut-verdict chalk-text');
+    const verdict = el('p', 'tut-verdict');
     let solved = false;
     return new Promise((resolve) => {
       S.cancelBlocking = () => { S.keyHandler = null; resolve(false); };
@@ -595,7 +610,7 @@
       };
       q.choices.forEach((c, i) => {
         const li = el('li', 'tut-choice');
-        const b = el('button', 'chalk-text');
+        const b = el('button', null);
         b.type = 'button';
         b.append(el('kbd', null, String(i + 1)), el('span', null, c));
         b.addEventListener('click', () => pick(i, li));
@@ -852,9 +867,9 @@
     const body = el('div', 'tut-body tut-slip-body');
     const text = el('div', 'tut-slip-text');
     text.append(
-      el('p', 'tut-say chalk-text', 'This paper slip is your decision. The amber line is the PRICE: calling ' + legal.toCall + ' into a pot of ' + view.pot +
+      el('p', 'tut-say', 'This paper slip is your decision. The amber line is the PRICE: calling ' + legal.toCall + ' into a pot of ' + view.pot +
         ' needs ' + need + '% (' + legal.toCall + ' / ' + (view.pot + legal.toCall) + ').'),
-      el('p', 'tut-say chalk-text', 'Before it turns over, click the slip at the height you think your chance is. Bottom is 0%, top is 100%. Or type two digits.'));
+      el('p', 'tut-say', 'Before it turns over, click the slip at the height you think your chance is. Bottom is 0%, top is 100%. Or type two digits.'));
     body.appendChild(text);
     setRing(null);
     dealer({ head, body, wide: true });
@@ -862,8 +877,8 @@
     if (r.aborted || !res) return;
     const off = Math.abs(res.read - have);
     text.replaceChildren(
-      el('p', 'tut-say chalk-text', 'You read ' + res.read + '%. Rule of 2: ' + outs.count + ' outs x 2 = ' + have + '% (exactly ' + outs.count + ' of ' + (52 - 2 - view.board.length) + ' cards, ' + exact + '%).'),
-      el('p', 'tut-say chalk-text', (off <= 5 ? 'Close read. ' : 'Off by ' + off + '. It gets easier with reps. ') +
+      el('p', 'tut-say', 'You read ' + res.read + '%. Rule of 2: ' + outs.count + ' outs x 2 = ' + have + '% (exactly ' + outs.count + ' of ' + (52 - 2 - view.board.length) + ' cards, ' + exact + '%).'),
+      el('p', 'tut-say', (off <= 5 ? 'Close read. ' : 'Off by ' + off + '. It gets easier with reps. ') +
         'The ink rose past the amber line: you have more than the price.'));
     await waitGo(r, head, body);
   }
@@ -871,7 +886,7 @@
   function revealBody(r, id) {
     const p = r.record && (r.record.players || []).find((x) => x.id === id);
     const box = el('div', 'tut-reveal');
-    if (p && p.hole && p.hole.length) box.append(el('span', 'tut-label chalk-text', p.name), cardRow(p.hole));
+    if (p && p.hole && p.hole.length) box.append(el('span', 'tut-label', p.name), cardRow(p.hole));
     return box;
   }
 
@@ -968,8 +983,8 @@
     const board = el('section', 'tut-board slate');
     const head = el('header', 'tut-board-head');
     const titles = el('div');
-    titles.append(el('span', 'tut-where chalk-text', lesson ? headFor(lesson) : 'LEARN'), el('h2', 'tut-title chalk-text', title));
-    if (sub) titles.append(el('p', 'tut-sub chalk-text', sub));
+    titles.append(el('span', 'tut-where', lesson ? headFor(lesson) : 'LEARN'), el('h2', 'tut-title chalk-text', title));
+    if (sub) titles.append(el('p', 'tut-sub', sub));
     head.append(titles);
     const leave = btn('LEAVE', 'quiet', () => { if (run) run.aborted = true; run = null; finish('abort'); openMenu(); }, 'ESC');
     head.append(leave);
@@ -1009,7 +1024,7 @@
       };
       LADDER.forEach((h, i) => {
         const li = el('li', 'tut-rung');
-        const b = el('button', 'chalk-text');
+        const b = el('button', null);
         b.type = 'button';
         b.append(el('span', 'n', String(i + 1).padStart(2, '0')), el('span', null, h.name));
         b.addEventListener('click', () => pick(i));
@@ -1039,7 +1054,7 @@
         const sb = dmd(['SCORE', score + '/' + WHO_WINS.length], 7);
         f.head.insertBefore(sb, f.head.lastChild);
         const table = el('div', 'tut-hands');
-        const group = (label, hole) => { const g = el('div', 'tut-hand'); g.append(el('span', 'tut-label chalk-text', label), cardRow(hole)); return g; };
+        const group = (label, hole) => { const g = el('div', 'tut-hand'); g.append(el('span', 'tut-label', label), cardRow(hole)); return g; };
         table.append(group('BOARD', q.board), group('HAND A', q.a), group('HAND B', q.b));
         f.body.append(table);
         const board = cards(q.board);
@@ -1064,14 +1079,14 @@
       const grid = el('div', 'tut-tiers');
       TIERS.forEach((tier) => {
         const col = el('div', 'tut-tier');
-        col.append(el('h3', 'chalk-text', tier.toUpperCase()));
+        col.append(el('h3', null, tier.toUpperCase()));
         const list = el('ul');
         TIER_EXAMPLES.filter((h) => PP.Equity.preflopTier(cards(h)) === tier)
-          .forEach((h) => list.append(el('li', 'chalk-text', PP.Equity.handLabel(cards(h)))));
+          .forEach((h) => list.append(el('li', null, PP.Equity.handLabel(cards(h)))));
         col.append(list);
         grid.append(col);
       });
-      f.body.append(grid, el('p', 'tut-note chalk-text', '"s" means suited (same suit), "o" offsuit. Pairs, high cards and suited, connected cards are what you want.'));
+      f.body.append(grid, el('p', 'tut-note', '"s" means suited (same suit), "o" offsuit. Pairs, high cards and suited, connected cards are what you want.'));
       return (await f.actions([{ label: 'GO ON', primary: true, value: 'go' }])) === 'go';
     },
 
@@ -1080,7 +1095,7 @@
         const q = TIER_QUIZ[i];
         const f = boardFrame(r.lesson, 'Which tier?', 'Question ' + (i + 1) + ' of ' + TIER_QUIZ.length + '.');
         const hand = el('div', 'tut-hand');
-        hand.append(el('span', 'tut-label chalk-text', 'YOU HOLD'), cardRow(q.hand));
+        hand.append(el('span', 'tut-label', 'YOU HOLD'), cardRow(q.hand));
         f.body.append(hand);
         const tier = PP.Equity.preflopTier(cards(q.hand));
         await question(f.body, { prompt: 'Which tier is this hand?', choices: TIERS.map((t) => t.toUpperCase()), answer: TIERS.indexOf(tier), explain: q.explain });
@@ -1094,7 +1109,7 @@
       const d = DOMINATION;
       const f = boardFrame(r.lesson, 'Dominated hands', 'King-queen looks pretty. Against ace-king it is in big trouble: they share a king, and the ace outkicks the queen.');
       const table = el('div', 'tut-hands');
-      const group = (label, hole) => { const g = el('div', 'tut-hand'); g.append(el('span', 'tut-label chalk-text', label), cardRow(hole)); return g; };
+      const group = (label, hole) => { const g = el('div', 'tut-hand'); g.append(el('span', 'tut-label', label), cardRow(hole)); return g; };
       table.append(group('THEY HOLD', d.villain), group('OPTION 1', d.options[0]), group('OPTION 2', d.options[1]));
       f.body.append(table);
       const rng = PP.Cards.seededRng(d.seed);
@@ -1136,7 +1151,7 @@
     LESSONS.forEach((l) => {
       const done = progress.done.includes(l.id);
       const li = el('li', 'tut-lesson' + (done ? ' done' : '') + (l.id === nextId && progress.done.length < 8 ? ' next' : ''));
-      const b = el('button', 'chalk-text');
+      const b = el('button', null);
       b.type = 'button';
       b.append(el('span', 'n', String(l.id)), el('span', 't', l.title), el('span', 'd', l.blurb),
         el('span', 'st', done ? 'DONE' : l.id === nextId ? 'NEXT' : ''));
