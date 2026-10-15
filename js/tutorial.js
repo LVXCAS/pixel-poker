@@ -1191,14 +1191,25 @@
     if (UI && UI.showScreen && UI.currentScreen() !== 'title') UI.showScreen('title');
   }
 
+  const OFFER_WATCH_MS = 250;
+
   async function offerFirstRun() {
     saveProgress({ offered: true });
     O.stage.hidden = true;
+    // The offer belongs to the title screen; if the player navigates away (play, friends, drills), drop it.
+    const leftTitle = setInterval(() => {
+      if (UI && UI.currentScreen && UI.currentScreen() !== 'title') {
+        clearInterval(leftTitle);
+        hideDealer();
+        O.root.hidden = true;
+      }
+    }, OFFER_WATCH_MS);
     const v = await dealer({
       head: 'FIRST TIME HERE', centered: true,
       say: 'New to hold\'em, or rusty? I can teach you the game in 8 short lessons on a real table. You can skip any of them.',
       actions: [{ label: 'TEACH ME', primary: true, kbd: 'SPACE', value: 'yes' }, { label: 'NOT NOW', value: 'no' }],
     });
+    clearInterval(leftTitle);
     hideDealer();
     O.root.hidden = true;
     if (v === 'yes') openMenu();
