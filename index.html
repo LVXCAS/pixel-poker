@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pixel Hold'em</title>
+  <meta name="description" content="A no-limit hold'em trainer under one bulb: play rated bots, nick your read on the slip, check it against the truth.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Crect width='8' height='8' fill='%230e0806'/%3E%3Crect x='2' y='0' width='4' height='8' fill='%23f0e1c0'/%3E%3Crect x='2' y='4' width='4' height='1' fill='%238c4b12'/%3E%3Crect x='3' y='5' width='3' height='3' fill='%231d130e'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/tutorial.css">
+</head>
+<body data-screen="title" data-mood="calm">
+  <canvas id="bg" aria-hidden="true"></canvas>
+
+  <div id="app">
+    <!-- ============================== TITLE ============================== -->
+    <section class="screen" id="screen-title" aria-label="Title">
+      <div class="stage title-wrap">
+        <div id="title-cards" class="title-cards" aria-hidden="true"></div>
+        <h1 class="logo">pixel hold'em</h1>
+        <p class="tagline">a no-limit trainer. bring your own odds.</p>
+        <nav class="title-menu" aria-label="Main menu">
+          <button type="button" class="menu-item" id="nav-play"><span class="btn-label">play</span></button>
+          <button type="button" class="menu-item" id="nav-learn"><span class="btn-label">learn</span></button>
+          <button type="button" class="menu-item" id="nav-drills"><span class="btn-label">drills</span></button>
+          <button type="button" class="menu-item" id="nav-stats"><span class="btn-label">stats</span></button>
+        </nav>
+        <p id="title-warning" class="title-warning" hidden></p>
+        <p class="title-hint">↑↓ choose · enter sit down</p>
+      </div>
+    </section>
+
+    <!-- ============================== SETUP ============================== -->
+    <section class="screen" id="screen-setup" aria-label="Table setup">
+      <div class="stage setup-panel">
+        <div class="setup-options-wrap slate">
+          <header class="screen-head">
+            <h2 class="screen-title">new table</h2>
+          </header>
+          <div id="setup-options" class="setup-options chalk-text"></div>
+        </div>
+        <div class="setup-lineup-wrap paper">
+          <h3 class="section-title">who's sitting in</h3>
+          <p class="screen-sub">click the stars to set how good each player is.</p>
+          <div id="setup-lineup" class="setup-lineup"></div>
+        </div>
+        <footer class="setup-actions">
+          <button type="button" class="btn btn-grey" id="setup-back"><span class="btn-label">back</span><kbd>esc</kbd></button>
+          <button type="button" class="btn btn-orange btn-xl" id="setup-start"><span class="btn-label">deal me in</span><kbd>enter</kbd></button>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ============================== TABLE ============================== -->
+    <section class="screen" id="screen-table" aria-label="Poker table">
+      <div class="stage table-frame">
+        <div class="table-main" id="table-stage">
+          <div class="felt-wrap" id="felt-wrap">
+            <div class="board" id="board">
+              <div class="board-slot"></div><div class="board-slot"></div><div class="board-slot"></div>
+              <div class="board-slot"></div><div class="board-slot"></div>
+            </div>
+            <div class="pot" id="pot">
+              <div class="pot-pile" id="pot-pile" aria-hidden="true"></div>
+              <span class="pot-line"><span class="pot-k">pot</span> <span class="pot-v" id="pot-amount">0</span></span>
+              <span class="pot-side" id="pot-side"></span>
+            </div>
+            <div class="layer" id="bets"></div>
+            <div class="layer" id="seats"></div>
+            <div class="slip" id="slip" hidden>
+              <canvas class="slip-art" width="36" height="110" aria-hidden="true"></canvas>
+            </div>
+            <div class="price-tab" id="price-tab" hidden aria-live="polite"></div>
+            <div class="showdown-name" id="showdown-name" aria-live="polite"></div>
+            <div class="layer fx" id="fx-layer"></div>
+          </div>
+
+          <div class="action-bar" id="action-bar" data-mode="waiting">
+            <div class="ab-status chalk-text" id="ab-status" aria-live="polite"></div>
+            <div class="ab-hero">
+              <button type="button" class="btn btn-red btn-act" id="btn-fold" disabled><span class="btn-label">fold</span><kbd>f</kbd></button>
+              <button type="button" class="btn btn-blue btn-act" id="btn-call" disabled><span class="btn-label" id="call-label">check</span><kbd>c</kbd></button>
+              <button type="button" class="btn btn-orange btn-act" id="btn-raise" disabled><span class="btn-label" id="raise-label">raise</span><kbd>r</kbd></button>
+              <div class="raise-box">
+                <div class="presets">
+                  <button type="button" class="preset" data-frac="0.5" disabled>&frac12;</button>
+                  <button type="button" class="preset" data-frac="0.75" disabled>&frac34;</button>
+                  <button type="button" class="preset" data-frac="1" disabled>pot</button>
+                  <button type="button" class="preset" data-frac="max" disabled>max</button>
+                </div>
+                <div class="raise-row">
+                  <input type="range" id="raise-slider" min="0" max="100" value="0" aria-label="Raise amount" disabled>
+                  <input type="number" id="raise-input" min="0" value="0" aria-label="Raise to" disabled>
+                </div>
+              </div>
+              <span class="ab-keys">a = all in</span>
+            </div>
+            <div class="ab-between">
+              <button type="button" class="btn btn-blue" id="btn-review" disabled><span class="btn-label">review hand</span></button>
+              <button type="button" class="btn btn-orange btn-xl" id="btn-next"><span class="btn-label">next hand</span><kbd>space</kbd></button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="side">
+          <header class="topbar">
+            <button type="button" class="tab" id="tb-menu"><span class="btn-label">leave</span></button>
+            <span class="tb-info" id="tb-hand">hand #0</span>
+            <span class="tb-info" id="tb-blinds">blinds</span>
+            <button type="button" class="tab" id="tb-more" aria-expanded="false" aria-controls="tb-sheet"><span class="btn-label">table ▾</span></button>
+            <div class="tb-sheet slate" id="tb-sheet" hidden>
+              <button type="button" class="toggle" id="tb-coach"><span class="btn-label">coach</span></button>
+              <button type="button" class="toggle" id="tb-guess"><span class="btn-label">guess</span></button>
+              <button type="button" class="toggle" id="tb-review"><span class="btn-label">review</span></button>
+              <button type="button" class="toggle" id="tb-autodeal"><span class="btn-label">auto-deal</span></button>
+              <button type="button" class="toggle" id="tb-speed" title="Game speed"><span class="btn-label">speed</span></button>
+            </div>
+          </header>
+          <canvas class="dmd-board" id="dmd" width="142" height="44" role="img" aria-label="Pot and price"></canvas>
+          <section class="slate coach-panel" aria-label="Coach">
+            <div id="coach-body" class="coach-body chalk-text"></div>
+            <ol id="log" class="log chalk-text" aria-label="Action log"></ol>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============================== DRILLS ============================== -->
+    <section class="screen" id="screen-drills" aria-label="Drills">
+      <div class="stage drills-panel">
+        <header class="screen-head row">
+          <button type="button" class="tab" id="drills-back"><span class="btn-label">back</span></button>
+          <h2 class="screen-title">drills</h2>
+        </header>
+        <div id="drill-tabs" class="drill-tabs"></div>
+        <aside class="drill-slate slate">
+          <div id="drill-score" class="drill-score chalk-text"></div>
+        </aside>
+        <div id="drill-body" class="drill-body"></div>
+        <p class="drill-hint chalk-text">answer 1–4 · space next</p>
+      </div>
+    </section>
+
+    <!-- ============================== STATS ============================== -->
+    <section class="screen" id="screen-stats" aria-label="Stats">
+      <div class="stage stats-panel">
+        <header class="screen-head row">
+          <button type="button" class="tab" id="stats-back"><span class="btn-label">back</span></button>
+          <h2 class="screen-title">your stats</h2>
+          <button type="button" class="tab tab-danger" id="stats-reset"><span class="btn-label">reset</span></button>
+        </header>
+        <div id="stats-body" class="stats-body"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="modal-root"></div>
+
+  <script src="js/cards.js"></script>
+  <script src="js/evaluator.js"></script>
+  <script src="js/equity.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/bots.js"></script>
+  <script src="js/coach.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/tutorial.js"></script>
+</body>
+</html>

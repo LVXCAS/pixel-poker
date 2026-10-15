@@ -1,0 +1,373 @@
+/* PIXEL HOLD'EM — LEARN mode (js/tutorial.js). Direction B "Smoke & Felt": the dealer talks in chalk on a
+ * wood-framed slate, the room dims like the bulb browning out, and a chalk box is drawn round the real
+ * object being taught. Shared tokens come from css/style.css; fallbacks are B's palette so this file
+ * also stands alone. No radius, no blur, no glow: light is stepped and hard-edged. */
+
+.tut-root {
+  --t-room: var(--room, #0e0806);
+  --t-slate: var(--slate, #1d2824);
+  --t-slate-2: #23302b;
+  --t-ghost: #2b3a34;
+  --t-chalk: var(--chalk, #e9e6d6);
+  --t-chalk-dim: var(--chalk-dim, #939e94);
+  --t-chalk-red: #e48c76;
+  --t-wood: var(--wood, #4f2f1c);
+  --t-wood-hi: var(--wood-hi, #73452a);
+  --t-wood-lo: #2c190f;
+  --t-paper: var(--paper, #f0e1c0);
+  --t-paper-2: var(--paper-2, #d8c6a0);
+  --t-ink: var(--ink, #1d130e);
+  --t-price: var(--price, #ff9f6b);
+  --t-text: var(--text, #f0e3c8);
+  --t-u: var(--u, 2px);
+  --t-fs: 22px;
+  --t-lh: 1.36;
+  position: fixed;
+  inset: 0;
+  z-index: 400; /* above the app, under modals (500) and the CRT layer */
+  pointer-events: none;
+  font-family: var(--font, 'Departure Mono', ui-monospace, Menlo, Consolas, monospace);
+  font-size: var(--t-fs);
+  line-height: var(--t-lh);
+  color: var(--t-chalk);
+  -webkit-font-smoothing: none;
+}
+.tut-root[hidden] { display: none; }
+@media (max-width: 1279px), (max-height: 759px) {
+  .tut-root { --t-fs: 16.5px; }
+}
+
+/* ------------------------------------------------------------- the room dims; one pool stays lit */
+.tut-dim {
+  position: fixed;
+  display: none;
+  /* two hard steps, like the bulb's bands: a half-lit ring, then the dark room */
+  box-shadow: 0 0 0 8px rgba(14, 8, 6, 0.38), 0 0 0 9999px rgba(14, 8, 6, 0.7);
+}
+.tut-dim.on { display: block; }
+
+/* ------------------------------------------------------------- a box drawn in chalk, corners overshooting */
+.tut-ring { position: fixed; }
+.tut-ring i {
+  position: absolute;
+  background: var(--t-chalk);
+  -webkit-mask-image: var(--tut-chalk-mask);
+  mask-image: var(--tut-chalk-mask);
+  -webkit-mask-size: 24px 24px;
+  mask-size: 24px 24px;
+}
+.tut-ring .t { left: -7px; right: -3px; top: 0; height: 3px; }
+.tut-ring .b { left: -2px; right: -8px; bottom: 0; height: 3px; transform: translateY(1px); }
+.tut-ring .l { top: -3px; bottom: -7px; left: 0; width: 3px; }
+.tut-ring .r { top: -8px; bottom: -2px; right: 0; width: 3px; transform: translateX(1px); }
+.tut-ring[data-v="1"] .t { left: -3px; right: -9px; transform: translateY(-1px); }
+.tut-ring[data-v="1"] .l { top: -9px; bottom: -3px; }
+.tut-ring[data-v="2"] .b { left: -9px; right: -3px; }
+.tut-ring[data-v="2"] .r { top: -3px; bottom: -9px; transform: none; }
+
+/* ------------------------------------------------------------- leader: one hairline from slate to object */
+.tut-lead { display: none; }
+.tut-lead.on { display: block; }
+.tut-lead i { position: fixed; background: var(--t-text); opacity: 0.85; }
+.tut-lead .h { height: 2px; }
+.tut-lead .v { width: 2px; }
+
+/* ------------------------------------------------------------- the slate (wood frame, chalk, eraser ghosts) */
+.tut-dealer,
+.tut-board {
+  pointer-events: auto;
+  position: fixed;
+  background:
+    /* eraser smear: where the last lesson was wiped */
+    repeating-linear-gradient(176deg, transparent 0 46px, rgba(43, 58, 52, 0.55) 46px 49px, transparent 49px 97px),
+    repeating-linear-gradient(93deg, transparent 0 13px, rgba(35, 48, 43, 0.9) 13px 15px, transparent 15px 41px),
+    var(--t-slate);
+  border: 4px solid var(--t-wood);
+  /* stepped frame: highlight, wood, shadow line, then a 2u drop onto the room */
+  box-shadow:
+    inset 0 0 0 2px var(--t-wood-lo),
+    inset 2px 2px 0 2px rgba(0, 0, 0, 0.35),
+    0 0 0 2px var(--t-wood-lo),
+    -2px -2px 0 2px var(--t-wood-hi),
+    6px 6px 0 2px var(--t-room);
+  color: var(--t-chalk);
+}
+.tut-dealer {
+  width: min(31em, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 0.7em 0.9em 0.8em;
+  left: 16px;
+  top: 16px;
+}
+.tut-dealer[hidden] { display: none; }
+.tut-dealer.wide { width: min(36em, calc(100vw - 32px)); }
+.tut-dealer.centered { left: 50% !important; top: 50% !important; transform: translate(-50%, -50%); }
+.tut-dealer.in { animation: tut-chalk-in 150ms steps(3, end) both; }
+@keyframes tut-chalk-in { from { opacity: 0; } to { opacity: 1; } }
+
+.tut-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  font-size: 0.75em;
+  color: var(--t-chalk-dim);
+  padding-bottom: 0.35em;
+  margin-bottom: 0.5em;
+  /* a chalk rule, broken where the chalk skipped */
+  background: linear-gradient(90deg, var(--t-chalk-dim) 0 37%, transparent 37% 39%, var(--t-chalk-dim) 39% 81%, transparent 81% 82%, var(--t-chalk-dim) 82%) bottom / 100% 2px no-repeat;
+}
+.tut-voice { letter-spacing: 0.08em; }
+.tut-title,
+.tut-tier h3 {
+  -webkit-mask-image: var(--tut-chalk-mask);
+  mask-image: var(--tut-chalk-mask);
+  -webkit-mask-size: 24px 24px;
+  mask-size: 24px 24px;
+}
+.tut-voice,
+.tut-say,
+.tut-prompt,
+.tut-verdict,
+.tut-sub,
+.tut-note,
+.tut-choice button,
+.tut-rung button,
+.tut-lesson button,
+.tut-tier li,
+.tut-label {
+  -webkit-mask-image: var(--tut-chalk-light);
+  mask-image: var(--tut-chalk-light);
+  -webkit-mask-size: 24px 24px;
+  mask-size: 24px 24px;
+}
+/* the house voice is lowercase chalk; names in the copy keep their capitals */
+.tut-btn,
+.tut-head,
+.tut-where,
+.tut-label,
+.tut-lesson .st,
+.tut-tier h3 { text-transform: lowercase; }
+.tut-say { margin: 0 0 0.5em; text-wrap: pretty; }
+.tut-say:last-child { margin-bottom: 0; }
+
+/* ------------------------------------------------------------- buttons: a paper tag, or plain chalk */
+.tut-actions { display: flex; flex-wrap: wrap; gap: 0.6em 1.1em; align-items: center; margin-top: 0.7em; }
+.tut-btn {
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.25em 0.7em 0.3em;
+  background: transparent;
+  color: var(--t-chalk);
+}
+.tut-btn kbd {
+  font: inherit;
+  font-size: 0.7em;
+  opacity: 0.7;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+.tut-btn.paper {
+  background: var(--t-paper);
+  color: var(--t-ink);
+  box-shadow: inset -2px -2px 0 var(--t-paper-2), 4px 4px 0 var(--t-room);
+}
+.tut-btn.paper:hover { background: #f7ead0; }
+.tut-btn.paper:active { transform: translate(2px, 2px); box-shadow: inset -2px -2px 0 var(--t-paper-2), 2px 2px 0 var(--t-room); }
+.tut-btn.quiet {
+  padding-left: 0.1em;
+  padding-right: 0.1em;
+  color: var(--t-chalk-dim);
+  background: linear-gradient(var(--t-chalk-dim), var(--t-chalk-dim)) left calc(100% - 2px) / 100% 2px no-repeat;
+}
+.tut-btn.quiet:hover { color: var(--t-chalk); }
+.tut-btn:focus-visible,
+.tut-root button:focus-visible { outline: 2px dashed var(--t-price); outline-offset: 3px; }
+
+/* ------------------------------------------------------------- questions: chalk list, wrong ones struck out */
+.tut-q { margin-top: 0.4em; }
+.tut-prompt { margin: 0 0 0.5em; }
+.tut-choices { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25em; }
+.tut-choice button {
+  font: inherit;
+  color: var(--t-chalk);
+  background: none;
+  border: 0;
+  padding: 0.15em 0.2em;
+  display: flex;
+  gap: 0.7em;
+  align-items: baseline;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.tut-choice kbd { font: inherit; font-size: 0.75em; color: var(--t-chalk-dim); background: none; border: 0; padding: 0; }
+.tut-choice button:hover span { text-decoration: underline 2px; text-underline-offset: 4px; }
+.tut-choice.struck button { color: var(--t-chalk-red); cursor: default; }
+.tut-choice.struck span { text-decoration: line-through 2px; }
+.tut-choice.right span {
+  padding: 0 0.3em;
+  /* circled in chalk */
+  box-shadow: 0 0 0 2px var(--t-chalk), 3px -2px 0 2px var(--t-slate), 3px -2px 0 4px var(--t-chalk-dim);
+}
+.tut-choices.solved .tut-choice:not(.right) button { color: var(--t-chalk-dim); cursor: default; }
+.tut-choices.solved .tut-choice:not(.right) span { text-decoration: none; }
+.tut-verdict { margin: 0.5em 0 0; min-height: 1.3em; color: var(--t-chalk); }
+
+/* ------------------------------------------------------------- the slip (lesson 6) */
+.tut-slip-body { display: grid; grid-template-columns: auto 1fr; gap: 0 1.2em; align-items: start; }
+.tut-slip-body > .tut-actions { grid-column: 1 / -1; }
+.tut-slip-text { grid-column: 2; grid-row: 1; }
+.tut-slip-wrap { grid-column: 1; grid-row: 1; position: relative; padding-right: calc(var(--s) * 30); }
+.tut-slip {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  cursor: crosshair;
+  filter: drop-shadow(var(--s) var(--s) 0 var(--t-room));
+}
+.tut-slip.done { cursor: default; }
+.tut-price {
+  position: absolute;
+  color: var(--t-price);
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  white-space: nowrap;
+  line-height: 1;
+}
+.tut-price b { font-weight: 400; font-size: 1.6em; }
+.tut-price.hide { visibility: hidden; }
+.tut-price::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--s) * -3);
+  top: calc(var(--s) * 8);
+  width: calc(var(--s) * 3);
+  height: calc(var(--s) * 2);
+  background: var(--t-price);
+}
+
+/* ------------------------------------------------------------- full-screen slate: menu + board lessons */
+.tut-stage {
+  pointer-events: auto;
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 58% 64% at 50% 42%, transparent 0 60%, rgba(14, 8, 6, 0.55) 60% 78%, rgba(14, 8, 6, 0.85) 78%),
+    var(--room-2, #1a0f0a);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.tut-stage[hidden] { display: none; }
+.tut-board {
+  position: relative;
+  width: min(64em, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 1em 1.4em 1.1em;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.8em;
+}
+.tut-ledge { display: none; }
+.tut-board-head { display: flex; align-items: flex-start; gap: 1.2em; }
+.tut-board-head > div:first-child { flex: 1; min-width: 0; }
+.tut-board-head > .tut-btn { margin-top: -0.2em; }
+.tut-where { display: block; font-size: 0.75em; color: var(--t-chalk-dim); }
+.tut-title { font-size: 2em; font-weight: 400; margin: 0.05em 0 0.15em; line-height: 1.1; letter-spacing: -0.01em; }
+.tut-sub { margin: 0; color: var(--t-chalk-dim); max-width: 46ch; text-wrap: pretty; }
+.tut-note { color: var(--t-chalk-dim); margin: 1em 0 0; max-width: 60ch; }
+.tut-label { display: block; font-size: 0.75em; color: var(--t-chalk-dim); margin-bottom: 0.3em; }
+
+/* dot-matrix scoreboard (C), drawn on canvas; scaled in whole pixels */
+.tut-dmd {
+  display: block;
+  flex: none;
+  width: calc(var(--dmd-w) * 3px);
+  height: calc(var(--dmd-h) * 3px);
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  border: 3px solid var(--t-wood-lo);
+  box-shadow: 0 0 0 2px var(--t-wood), 4px 4px 0 2px var(--t-room);
+}
+.tut-dealer .tut-dmd { margin: 0.6em 0 0.2em; }
+
+/* ladder */
+.tut-ladder { display: grid; grid-template-columns: minmax(13em, 0.8fr) 1.2fr; gap: 1.6em; align-items: start; }
+.tut-rungs { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--t-chalk-dim); }
+.tut-rung button {
+  font: inherit; color: var(--t-chalk-dim); background: none; border: 0; cursor: pointer;
+  display: flex; gap: 0.8em; width: 100%; text-align: left; padding: 0.12em 0.6em;
+}
+.tut-rung .n { color: var(--t-chalk-dim); font-size: 0.8em; align-self: center; }
+.tut-rung.seen button { color: var(--t-chalk); }
+.tut-rung.on button { color: var(--t-chalk); background: linear-gradient(90deg, var(--t-ghost), transparent 90%); }
+.tut-rung.on .n { color: var(--t-price); }
+.tut-rung-show {
+  background: var(--t-paper);
+  color: var(--t-ink);
+  padding: 1em 1.2em 1.1em;
+  box-shadow: inset -3px -3px 0 var(--t-paper-2), 6px 6px 0 var(--t-room);
+  position: sticky;
+  top: 0;
+}
+.tut-rung-name { margin: 0 0 0.6em; font-weight: 400; font-size: 1.4em; }
+.tut-rung-note { margin: 0.8em 0 0.3em; }
+.tut-rung-rank { margin: 0; color: #6d5a42; font-size: 0.8em; }
+
+/* hands laid out for questions */
+.tut-hands { display: flex; flex-wrap: wrap; gap: 1em 2.2em; align-items: flex-end; }
+.tut-hand { display: flex; flex-direction: column; }
+.tut-hand:first-child { padding-right: 2.2em; border-right: 2px dashed var(--t-ghost); }
+.tut-hands + .tut-q { margin-top: 1em; }
+.tut-reveal { margin-top: 0.4em; }
+.tut-cards-text { font-size: 1.4em; color: var(--t-paper); }
+.tut-root .tut-q .tut-choices { grid-template-columns: repeat(auto-fill, minmax(11em, 1fr)); }
+.tut-dealer .tut-q .tut-choices { grid-template-columns: 1fr; }
+
+/* tiers chart */
+.tut-tiers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0 1em; }
+.tut-tier h3 { font-weight: 400; font-size: 0.8em; margin: 0 0 0.4em; padding-bottom: 0.25em; border-bottom: 2px solid var(--t-chalk-dim); }
+.tut-tier ul { list-style: none; margin: 0; padding: 0; }
+.tut-tier li { padding: 0.08em 0; }
+.tut-tier:first-child h3 { color: var(--t-price); border-color: var(--t-price); }
+.tut-tier:last-child li { color: var(--t-chalk-dim); text-decoration: line-through 2px; }
+
+/* lesson list */
+.tut-lessons { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.tut-lesson button {
+  font: inherit; color: var(--t-chalk); background: none; border: 0; cursor: pointer; width: 100%; text-align: left;
+  display: grid; grid-template-columns: 2em 13em 1fr 4em; gap: 0 1em; align-items: baseline; padding: 0.3em 0.4em;
+}
+.tut-lesson button:hover { background: linear-gradient(90deg, var(--t-ghost), transparent 92%); }
+.tut-lesson .n { color: var(--t-chalk-dim); }
+.tut-lesson .d { color: var(--t-chalk-dim); font-size: 0.8em; }
+.tut-lesson .st { font-size: 0.75em; text-align: right; color: var(--t-chalk-dim); }
+.tut-lesson.done .t { text-decoration: line-through 2px var(--t-chalk-dim); color: var(--t-chalk-dim); }
+.tut-lesson.next .n,
+.tut-lesson.next .st { color: var(--t-price); }
+
+/* fallback LEARN item if the title menu lacks #nav-learn */
+.tut-nav-fallback { pointer-events: auto; }
+
+@media (max-width: 900px) {
+  .tut-ladder { grid-template-columns: 1fr; }
+  .tut-tiers { grid-template-columns: repeat(2, 1fr); gap: 1em; }
+  .tut-lesson button { grid-template-columns: 1.6em 1fr 3.4em; }
+  .tut-lesson .d { display: none; }
+  .tut-slip-body { grid-template-columns: 1fr; }
+  .tut-slip-text, .tut-slip-wrap { grid-column: 1; grid-row: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tut-dealer.in { animation: none; }
+}

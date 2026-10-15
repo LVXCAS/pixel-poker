@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel Hold'em Table</title>
+<style>
+@font-face { font-family: DM; src: url(data:font/woff2;base64,d09GMk9UVE8AAFfgAAwAAAABSgAAAFeQAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAADYPaEBqFYhuUbhyWFAZgAOpuATYCJAOSSAQGBYgeByBbJ0mRC/1P7u5tS4r6RRqA3GIAlX/Olb1lcIFt04l41nlDup6FdNjsYAwbJ4Dh+a2z/////////5XLl8fmkrT15fwtLcgQZODm2O0OLwIBpKaCgyKrtRHTlKsxpmxVWWhFEXOQU1M38lQa2QK2FB8hFIHa2mfME83kZAWum69SqZQ6C1tSu5J0tybnq2+23W3YPoLcD8y/S0dVcipmxpXSGEZ2zZOt2Ek8Y6lgLSIiuDuZoOrmW6cAuaBK2pOv02xhP4Y7ZmZukm6Ge/uzqvh5uFNEULA7dydnfhEBERCB3vI+M08sIiKCPTyKgAiIQG+HXRUlc3enJ3bzLAIiICY6Q5yxr5q5u7sHiysREAERx94NmSnY8F7EbJlJB5bDexWrqkqIodz+skxKAimUK1M1esugiLDjo1JECGYmqaq0f/5iZQcMz99FQEhSrQ/m5O6Sqhjob+5pm2EpoudP+Q4iIAIiwMF+C+j0dH6QGlst7K2DD+qav67XtAOYdX+RP/pTPrL3S1s299w7F3r/nMTCiU/U3mxaaE1FfyQQJBAkpHZeiY5GI6iRDS5ZCUaBZtyHu7S/8a/Y/8FdRnGCuEHnpQN6OwPcMe2R4w4J7x/UJC9/QR9AVaCqK5cGPE+wtt6fWRGJMgpxjUZExMJCREQl2yDbLkzMswsz+soMepCx13slVVc9lFNAkhSCpngCR2qZXOaIOH5KkewvAIH51y0/gQQ5NZm79XVYhk7nglvEgBDEEkQJoFPvd9KNpVgpJB0baBMWlMv/0y/73zq7b88fileelI1BZaOykmAxEi0wBlQccjOrm9jUce06fyXqaJQDInYKH2KvIljo1ssLJUdQk0gBxP/vx5qLJ82cgSxe8UymiXc6jSYJIt2TeCRTzd5HPOtuABxTzXFzEapj/0/i1jcMZ3E2AkUcbsPr1vvNyyXAHQ9LQhSNCaLB/IuZT5Vh7dwO2Fm9Kze1uYE4dDJSoN27HMXqi+YjATXoUnNezBqrlD2htkIdkMlAnXHw4Ijpwd+1X3nbNSTTbIJkkwiGEhiA//8pU94lXODrSaupw5x1bPoHAmj7yWsC9YOeUIODOjU1CFTqSjGIdB8OavJGHqhuSkJHujuEMhABYNhkmuzafgZIhAMNSLWccbfJ01odj8I4hIQCt73hCGwyCTRnq4ZBICREQgQU0K7weG95Is9IBYaJqEAcnNjsdsuyrFgICwqGY8qf4OCiuEyCggRB1DIurRUXIRET8P2YrIS2MPqWNg2Wd/+u6CFmQcGSpMLOT25Jp28F1Qp0yg6bFHV3ULxQoHMyq1D49ifG5QPyoBjXVvJuSeigD4KXuqd/krt9bayfLgYW6SB/5CAHM1WZhcTu+UyWxuhoaRCWivCSS4rwqeUBMuzUApDEIk0klX92z9Q50EeIvnUxJuCAq4VXAQJ+tbd2R0j9iH9I2ZnZVQsKJ39N94ba6Y3TxPl3WRGize7fKWrVFg53OCynCBYrMErD8/InL2f3lBocGP01lmedTWT+p2rZEkveORWN3XWpbZb4D3grEaQ2kBdCrtx5Bh/QjiHRgY6h9Lhy1Zgg3VAjiEfiHNb2/hGk/XYZbnL+/6tatsCQmwKdam/n1BSc4JhO76YT/n/gHZIAaYmkdCyOtCEmPDz890FIoiSORpPkEEObclFu66Zx5XVRuis1jqGvXZT2/3+/b/Xtv8fsjCiuoY1nxBslXhl5iGgyaSN2GcQ0iWYxSzRCYxKLSIjeLRJKohGJLELqENiOd480ganvbkaBpQWWcfzza49p58JbEdgauWLgyHqT/lYkTMSHUji2fLBvbSE0k+CiRJPTzvwBoPlLy1bv/NnrEoFQd5I+/XQbZKr1JLi9d9bd/XdlGizBNmNJQgJNhJzWPtneZpNTTYWfKSFiPERPFCrut2G9eVq0115fbFgkBCuDDDKEIUgIn/Q+fiwMChGpcMsL7xTmJfpmZ2U3vu6iEPi+x3u/DP9lSlHR0UsWpe1vL+lEl/1P3Luvb2Tii3R+0WteDEV/+7el84+w/UevTfafuW2/qgZrar2OBITSWFGevVoac9WGh3Nd7Dp3uM+jnvaSNxUpNsdCq5XYYb9jzrritkde+tcHpH53i7VUyB0aXSS9VJnaTWh6C1vR+ra1t4nNbmErWt+WdnWwo53pcrd60LP+7r00KATQWflJb/AEwkdLNqkUUks3WJj042YSZwKJR0g6WiohsaKOMY74QyYWISVAE15cOEEJImFgkqFEEwgSHh2PKU4CxJFRqECwUGPEDg5HHJFSh8IZyhhsTsVT7dQ6jY/raXM8TtcTcMJP3Ek8GSfv9Dsjz4Qz48w7S8+as+FsO3vPiWM89uM71OFO4mTPz/N7MBodZS1DWxcxGWV1ABxHZvL94xbCEWXoqixqJk6kkJiMohiiQBqRTpSOyEYily41IZJX7IE7xMm5Qp31mZ1kKCZ0QUnI6VuHiLi0QVlFVaMmDRs3bd6ydduCopKyisrq2vr2+F+PYXnTalYkWqo16RSVkTdl3trCzde8nBjDKvFcutSESEF1xg5/TMoV6kZbZ/UQwZgQSajiUo276yeeq3ZQpmf4/9whLqWWcaPP6PDT4WSuKgfez/0RyLQWRw9/KUUNIAJPYRux84kSZeXVMC2DJsxbs+vEtaKkatZZ30q1prauPpattBFa0r2pK5hIghLq7RrsPopLZPdILrt2z5XX2nCL7XdLFuoAzsnW0OaNCBm9SpsD43OrO8dX2wE2isgbFz78cKgkMMlQpgUMhYiGywQnPkLEkVHQKVIDY9LmBzVaLNhw4gODJQRPDIGqKm+dUgrGLFq3IyQuY09VQ9eh/3QZNGxUUdm0miWrUk0tv9RoFTNuMWWfmIRiFStUDwiLqZ/ZoH95iiSULV8ts27GHGEFiydWOs3ysBxLr8VtISwhi2iJWXIyakAUiWXCLUKUU0a16TkROHKpuZCk6mrr6OrpK1G+Wt2w2PqZDfqfp3B86bQqkazUmXKGxsSXKp9YjRfkhDCIgVhIgeJQudgACV6xR3ZfNFXGjT6jzeWnw8lsWUK6JwxgFI7AMqzDCdjMlFswJWruxBVL5utmR2/z0zGhtFMgTx+r3en2+iUV1AE4MsuQjVeEIEVVhjX0MXLwo4Ul5VRXDlZagTK1WnTUQ99EvgYSvGKP7L6omM3XWGtwYn5t9+S6KCnT6StqrPOxbKWN0JLuTV3BRBKUUG/XYPdRXCK7R0xccYdRjlYMYxH7uCULdQDnZGto80aEjF6lzYHxudWd46tRuABAFoc8NbpMWHPiSYYyLWAoRDRcJjgJEEdGoQjEpIMeG15IQsQRKSt1usWSTQeufJqyIiylqOFQm0ETJgWWJFqqteszbNKc1bIEKmAHOOBBHJRAFcCABzaYAw8IAw4kgQIKoAYosMAvMAAb8IKCsyk1s4epmMJT332fySo89X0k9V1gCYT0BD4gMHpTJsBilWtPFBkLRARbJPYH+56a89mHIQQKbw3dgVDngRqvhlBBLgObGMPljDH33VJJg2RvDQgNBdEUkparTYw4DCMB5F2V/i1CChGGaay6HQI5NXOJlDUuH5BitVgNWbPC8/kUYhoFx1X+u8JMk1OuWe+Hqlbwk9KNn4qlROP/FUh+wy5D2Gw6nOjNGWaC/KVMINGQ2JVSXE2xKJasVbJhFr93LEjpLEmcQSo3i5m0QTt2sRY5nCzgLSyMlDGUrEnj7ahq0y6pWjUl+Ldyqbxp+eA7zT0t37N2UA/R9+Kl09ypuZCjeHNQ26Qr10VZ5NvdbAVI1Jpvm3gxmKYWTwQFq1m9u1ptFygEBUDkyGP5bj4M9/SJ9Wr9RtnB7BuBve77vb8f0nH/RjpCukWL5Dkpj4RrR6JfHyXCg1fYerwfM7PgPA9yWp9VEiEyUsoCXWzSyzaXmdDPzuzMk7Tg00XrBeimHPw4b+UgGXLEBEh44rjwZetUotAqiCYixcAImoHLACDWWoCqQRVJMxxpbgYxa6lt2pYHuhDTOBGWhWvs/lStQxS3bdTnEc4AmlRlgTX1MccpjniFd1y2x+4yXjOT+yJEktjjz6r2o8ZUwVKm3et6QZ4tNSWWFRI1OZwa87pZl4gRHcmuBUkAvkVwS2UbrPTKF6PQokgGf0AiPCelqxy45dnUIcO0z1aPE0eZT2AoUFB1Z5p5hKci3+Dh4Y948hJBi1VZVC/vdexFr6af1uaDEKzIvs2+3gP7V/KRE9dBiZIFdau2VGHd61G6ujJlq6//NZQrKl/PetW7PvV91v36VBEIf+m3MWESRVvV93V1lx1G0EQTiG9AbvHszn5w02oey3ZyWwiTIbyHMeAbTA6NiWeZqc9UjwQTNhshdChCTsuNrIsNnOpSuc1yuomwH/xCpE2mrZweIoxvRxj2+Jhan1tMQSiT3ZsI41ZOHyKMS209qPvxCJM/Vn9gAnlcTyKnlTCJHsx3LGhAKQCllF7IUKCUUsoYY8AYY4wBYwwAgAEAMHaBglDGxRQEKGO7mIIwwnYHhHGprT3AFITtYgpCGdvFFJSNqT1gHO8VVcMG3Mc/vOu49ystO5TsHWprLtt6dTnZqcn4j5Xav0dw3ZtF/nCVfO4X/oTLDYCfmBVulN1i25UV93u/l1cKS4WrBYdLeZajRxZ0si4wikBnbcryzkWTwkVxqgW0Zu6nrtf6Q/WQ+E95Ww3ZDgnAVt+qggMyePCotVB7UpTGv7ci8fMeB2XfXCsDV6GKGl/1laj6tS3LgIQLpKMLqXBuijkd3ytTVwMUbLEOi3fdFXaImn6T/JOIPvpGiwfiQS8bb+037w1/PPAJP4fv5D36ZuIfijZ6DdaKM3itk/aKAeOMMmCU8TBgNKxT6sQiDuIgdmIRiziIRbwvU5EskkkySYpkkSySSTJJ/tLYLjfhkM55KgdO03k68NDw0/huCAVIcEgFAJrgCQDqBckE33C3As6qHBQGwBFIFBp0hC9REhgChQFwBJIqxkNQRVOAyBkgEAgEQqNYPrFpVHGSS1j+2RMUqetvPwmuzrX58+dEbI9sOxzHGEICaMD8SGC9wGLXJffa9wsSsI9Ps7xqHVvenBy9RhCv+c9vXIIMjTfo2puwHNPEMYidsTLQVq4w6yaiyGyVVSBe53z73MMgxw3Vk9GYzt3/ofsoJkRW42hsqkGXULo+rDbh6gnkevGeZHvDlIugCuQXn976Nz9/hOYm86x9blM46tqSLAv5Pl72Xbdn2t7YbF8o4tP7GSfD38NaGcov33umCon3/YRTBgWgPKEKKsF9A3dVqbMhAYZAt7GHdFfxFvZYw5NiSgOHkD582Z5kSQAcgihrfaUrw9XD5/enmz8GPV8/frkSrJwhkCg0Bgsbp7qf6FFXR/iS5OM5K99eS9svmBZ2zPPVvl9YM0NPh5oj+R4q39ooELTT4uo0EJK+oXA3BGBKahQ2GqwLUBDBwQXQgqWQMDoldAtjJ7ctUTnaArNIAgNIzLagazGZoQJHl9hF0nFUOiXyNIiteGashvA0KvraYMSUQPaqdClJH2PTs85u5HYQJeG2lfNGwAo1rYnApiTZ1JzxBZ+ax15OjNW0JutI9ZCKv3KwLhycuiy2zl4sDA+tqm/xl5s561ZS6C2JLJIIk1zHOj+Yt2QyDw0XZtC2Oa6j8r8mSv54///E/n6F8luffJFD/QskzEKKLv4HpR+MoRU4yTFKw7x5sR5vn+g0CJrVeNf/CYtcanvO8uErXfiDykmcy781b8zz38MQrMn+0JIao6iDBOUt6xnblFOMwBd/+U7dJf6xcmSsklnizfHTO6k8ISUjkFNQUlG3At5jiPgB4mZuzGbv8OWn2NPzRw2Gt7aNF9UrK/liLR3j4Xzj/88JQaAm1mlsrE/Gs1ETokQT2cQETaIWmRy1ydTYrOKoQ2Z8zKUutmhebE0WxHYtOuqRFVGfrPpoQDa+NCRbY4e2x85kZ+zW7tGI7MeRHHhoTA6/TMSJnIgm5NSxRxfgjL26GPuSyzigK2OSbuAgk2lKbmIBLvW/NVzJPRwi94/m5OnRAofJ64cjyT84Rv49WpIP1op8LlrX7zj5DifIj2gjo6mAYZQoPDCcMging0xgFFVaOEeVgTH4gDKDM9hc8GRL4QJlLXRm2wercDbGUZXGpaAq4wplf9OFa+JcrvWkKzseuuFDTKKajmtBzTCVcr3pzm7Dh9te+LL7TTEuZq/hz943Nyk/XIrplP+4HRSIWVTQxXQqDLPxCS7jcPyEy1MRhxCOxRwq7jCTisdVnHAThrlUWjwMysQCKusmnAtGBPe5iIwn1AAsogYeonkYFlPD36EI71ML/y8LP8S214c+Jx5f0z9jIX6m/9QQ98tgUpE11Ie2gf4w3IpOeAGP40nUxeAwDNAIJzEY0QBDDTyC9xhqhjtqCzG4GSfiZIY6N4WRimdwGmrB/XgWD4SGe3GXNHqhBmrCE7gbf+FXfIkfGVqNWPyAR8UNj0mbm164BxWGjg96i3ckSPdhAb/hD3yPDgy+6Ij2DH5jPkMAbsHnOIUh8IkJPC9RfzASr+PFGIOX8S5ew5t4JUbjHaXcXjcsDaEJZ9E+daPOhW3qjq5XqGQ1i3I2J6wylV20EPpIL/Vht3rp2DkWHZOjdmwMeNyjPKixHNUxPNIOW9XwgA03pnzeszFXpzFnlmT9LW7VlrFur6e9u9fsU3upmuquejl1qmZqo8Up99vSbRrdFiq+5IEZI9MHbbMBJzi1baHplDqJLctktHlgy98yy5zhtrun8+zyFbyABqEMpEGXoRN4Ah4PT2ACn1r7rC3rwNqytdgaNsW22YZti7aasSB907Y0nIqxGf+YYpgf93znb8+BUQ2XLGTNWTu7Z0K2OxvJ2PyKc8E5zmk7TzgHnYKrx5V3ea5rrg13vzvq3ukuu888K56lnjOeS++Ad7x3l3cGUSAZREXOItfoODoLPYluYr0YiTWwBTboU/hMn+u76DvE+/EOvgtfJUaIWcRVYoNsI01SIs+Qx9Q0NZ/aSw3RMJ2lVfosvcV0MxVmySDm3L/oX+w/7d8KtAfMgBu4FDgJjgbnBjcFjeB6SBWKhTaGnoTrwu3w1vB4RBWRIisj2yIkcsXOsjPZ9SxgTXaTU3IcN4GzuANck8N5KY/zTX7BT/BZoV0wBVm4JOyL7WJZBMSRmBUHxYAkkaxSUkKkbVJTwmWVHJUXyBtkJq8qHYqhTFU2KoOqRNXUReo2tV8taJPaRG2m9eudekdf6lg/MjqNhDHVWGdYRiLaFZWjy6I3Yh9jjdj+2H58Jr4oviNeiE/Ei4m5xNTExgRL7CWRFWll8srmlf6VUoAJtAKDQC4wF6gVU3BB8EhwJJgKSaFJoY2hoVA1zIdXhY+HDyJLkeWR05Hj6GR0ZvRCdD7WGCvGjNipWD22FpfGg3Ez3olL8e3xfLwZRxMNCVcikZiVmCfkxGAikhxPCkdasp40k8eSH6nGlJgam7JSO1N5ajq1n8rPmOl0upa20lvSQ+nVdCLTnKEz9YySeZuVZZns7OyO7ENOmcvkOrlBrjO3mDvJJfLdeSo/MX84T82xQnshWKgV8MKoECngwlqhtumL7eKGolE8KYF2SrHSnNKWEisdlVvLZvlA+bDSV6lV7MruCqysVbLVeHVLdVPVrJ7XdmqdmlXbX+uriXWqbtTv1jcaSINqVBty41hjrzncrDTN5v+tida01vqW1cq0Xe12e1MbyX6nsVPveJ0r3Yau0Z3R3did6j4BKiABzAZM4AAwDRwDPNgOiuAUcBu4D3VDVUiETkE38BBcgedwH7wCe+GywCEqMgvpIceQf2gfOhmV0W2oQndQHC3RGubGDGwaNsQYto934Bzexg38MD6OiwRBlAiTeEU2kylSI0+QbRKlpBSgxlPbKEDN0DBdpUl6SZfpRQZmRKbAnGRWWbB4sRmWZHew81wT1+Q2cgf8HD+H38S3eEEAQl1YE/pFhVgUdfGkeC0xUkHipS3SoCT03L1Qr9vjevt7qLfRE/pov9jn+pv7pf5sn5NhWZFNuSfvl3eUBiWhbFD2Kx0lpPaoLXWTWlXPtB6tpunaDe1Un9FNXdBnek3f1KsGZcw31hvAmDSlJmHGzenm3Bw1s1bY6lq2ddnattvtjk39uX3gyJ2KoztTZ9Y5cuvdrEu7O9x9N+7NeTO9HZ70vvxhx3T6zilnx5W7cXex67uj7q/X4sW91d5W79hX+DG/5S/9DT8a9AT1QAzOBW9ha0iGE8JN4WT4FvVGerQuOh8dR2xcHyfiibER74nH449EkQSSeDIn2ZGMJEcJwZRNZTNsk22y7bl9w37K8dFRdlxwPDr/Oh+52lzTXTddr+5/7v88u57LnkMcQAfwg4lgCTS4ghD0wQnQhwquwAyaQSUko/1oEf3HA9iDZ+IjWOI5vI9ZXCSNBCUt4pI5gWSRPBCONlOFjqdTimgvrekYfaFxWmRSFmBd5jPJ5tgB47mMI1zjU7jPAVd8iwe4KBBREhvEqLgQYSEiiPXFwrFKTIkdi+3EFXEtPik+iWfi/XEqMZCYktifqHHvuancKa6XW+ZCXJFHeBfP8gv4IV/mz4ROYZPwVgQHTDwkjkkyySvNkfZJXSknD8lZuSXvk0H3U1k6Jm2mcMqmJ9Ll1JkmstGsk23OTrNYPp2X83rO5cfz5TxT9BXhYnoxLWaLq/KkPFqul6mqtdKqKdVaJatTWKVe4ZSxiqUcVPqUiJJRKkAOIOAGNBBAHBRBEbQBDiRggxnwAx6oAIImMAEv4EBJValOlVZjak37UvsTlRyUKanJoeQyk7PyWIZUk1LVTLWqBtSkulMF3aEZ3dCcnulOvacTpsXQJmrqBjKimRhsarNkHIY1Bau0HqvYliWsY7fYQTtut6zHhqygHglgGQuCz86NJx9wYhTUIp8k1YXL1FZddNdP/EhmGXnqc23+HrHgoismrXnq1Zvx20mX0xYhiTSDpJdhllzzyDdcqhWHHZCFOViHAlxAEVZhP8RhHEHIgnDEowoCkYqmiEM6GkQ4ygwhhvv4jpuYwTbeiXVs4SCuEciQ3EmFYGRE/IQjGjHIMEFJig760g390C7lqUZnNEJ12qQuGqAJWmUT+9iMvVmXWWw7k1iRETbAvIxj59lKW0s3V7B0vW7t0fRVfV2lGq3/49////jL//X//L3395rve9n3DjvEwQVkIR/ZK+f9fOyeq0oZbqmR13OxX1EsuHwts1VsiabXaD59IcDsquHcxCboSY2aX/Hod1hD+yg31FcdZxWHwCNcAjmXTAMzrbap2zXDhlJ1Dv2sPDC2z/wbUcyLH9Kt77vgoRCrk1rtOMKv0VgpZy27ysz/qNHwd8yivOFhenvnKfdRQE3WMaL2EKHzUzWXM5zxxNRYbe/XY11fF00r13A3ksbV3Ye4uEq5J411saRvjH2EiaDFa+SNZtJKci6olNsbm3bTztz3vIEY52sdlBXOug39y+1c8+HIJk2pUuO710KRaJC+s3YnWmWGWhMFfyZBRssBs0hxyCY3KH8yQ8f9uP6CqFPw3Hvgd2/ZHUuytXT9mXDqNs5lK+gBA2gtO/QX8odDbiBcrDJrHAOmlprjdX09VVndNiY5z+2qpU01HIoRVY+9KXJLoI8bb1vpVdfshI9CYx+9u5uTtPoiQviVAqmIV85XLTA7KA+hamSOQfSPHPnpeiUQkm60XSnwxKzSXK5bNXrLOn1+ts1AuZB+50+80wBew25tZbbc9g7djIvFtXS1jFhkyNXyHN3utwZHh2PPffQXLL6isdrxQs4nqtr4dd0PWky7sL6wBd8LPVHf81RsdPKp1a0uZxrVcApfS0NfBmpiA/L5UHb01lVnd1Yi7vx3yuia61IJMYR+Ik80maTYd2ATiE9b4FN1vBRq3z3n4vROSw+8PQF6dPmvix+3PKFeEwY9QNOT2WDRjgi6/AsROase1kocPjNV7jXv8bkhO0v5mIxFYvXCfssRup8sE50ybX5lYa5BYAlndDIkFt5WfWFBCLcLXi7M+fzW9vLcofeCAxfkAPNTPgOGCYDB5qwAzvB10MNVIpm218yHmke/TMnn+/L3PnTFpraW9oa7cu2JlTvPvJDcKFGnnBTHieNcmj+X2mVJYs8dYAIKXAN+5mTGlaI1MU35nNbUPk6jwEE3616OIvzVchCYuwd6X1pWy8C5zD/iHEXidcDS9zDh0SYbKWFabJhd8dmEb8vfwhyWGJkjEdP3iV0L5zsyw2reeggXDH29MmvTLl5P3+qQ+tF+H75wXYqHoAcAohS/s2IO0QortwrtaZd5mqfaZTL6gME5jEkGjgLEDK15zD3CcB5QgzrROAugeItWpjKnwDQYnIn9kV2uxosnSspjPM778pqMvKaTE6OJ6160N/o+8pLR7+1fCgWr47kwlMAP14V0PI3vJNC3+5AymNvq1I72BVvd6HUqrJXIuOdAyLwm3M95NIlStdhIHnsjhK0vMRBkv6wcG0ocDu+KBsucNxLs9RDBg261C1REL5qiLKZzgea1537k6F3puJGCQnOqlNUJ7NMMpCQEGsDtEqS6J9zBYUDwHauK7vfZ+Hw5T+symoCGzAXpZNVHP8siW4WCx+PvMcE3SoakVlgHf2zH7Stmzt2CIlCwfCGsdKMFP7wzRiYyfRxoUtEE5ZSNasTT5RTYW/Tp101FqUog4blQ/S8wiSNQRtN9tkVGfWVqlM6WeEfxRiUBIwyOeVcjqaiqcCmPuytmMWs0sX5k/SKjazSzqlUqZR8KSzxGh300zC6XGEX5WwshNHPpwzFQForK+NZQ4XseLjBGnH5U9Hl/BU4A0I50abpU6rr/Ua8fA1Oc++EGmCTLOyCWSAuKCwN0Isk8Ac24TUxdPidJXo5TrDgNZdqXqF+8Yt0Y6LDd7Swbtg7y0xqSnod+dQuyGQaLLFuIcH9zETklIL9TKUeRuvHi0o6mTU/ss2qdRW7UTRFtdFz7vQj05mu9mtXgJiQ16w+8HR6+0aSWmz5xR+aIe77rg4lAKKWOElhfvF7VWLOmwLdoXOo1QsZvnCAIXvVu62TU6NdhUcS5FYMD7FLyadKtzB4TBQ8hKSaLQltWqngm5mXODzlnSiqvi9evyLa7KhQ6KlYKDINmDFNAiCJZuaIa62p9NHnUsKLxOK+VN90260yFLBqy6KVD7iMuH+FqG9Vor32k+4eQLuzbRt+Km/unBvaOzXQaQHz66MVZXO71s+SjTz0mv/XiTbHi1FGDvmSoN4nmDQG5gOdrv1WN/IMdJoKXCoMnzEACKvLbYRNetl2vbB2NsRyqvZWXFUPvKgXWzYR6EFTLTKfrSZdEce4SDrKPKqIugJztnDjRzOp1chd7ZGmT8sWInTM4Z0Ewa90U5jVzjkgviTSxifJ5e3vxevK9RdaLRnJq451vg8MJ3s42tpel7cAY7Qf6aqRc/SLIpVK4H6DY5th5DCgzvOAqn3dNwo59oa+4R3pBminKr1nzKwJDwFH/YWJDlXHGFC0ULH+MyNcT8vmZPnUiw5QtW3HwuIrD0dtIVRS6YoVK5JrH1hJCpkN4mpXG7kjPJHpoJ9IOmWaTVMdoDnHbBASgQxkDpicGCWMJDqR+BsJTHPO2bD9mgFtzF7STSmH2SGhrqTH9M4nzlod3Ev0hU/xUPRDl8AJZWoifiNj2MBn9KDkCFn8twNC1SR70DNa4Rt4c95FwwkdpcsrnTyj2367sk3RpXTQqeFzpgpOuZANTjwXCvwvjf5ia77/MWh00tUG9d+gSR9Mbx3BBHewEDcEO4GwRLVrpB94hRMiwGJygZHaEfg+wJo2KaBUA5lJQFU0zlw4eYnENKRh9BOGJcI7HCHzZlr9VvXv4BGIdd+jRPGDuUonUxJTkC5IrXW8KBU0slmo11G4gAdUpu0sXYsEFRMtkVf0wkAT4AYlXsyD2aPBDwBqYQTAXNUA51sDTrGVim8mTWuJyTry3HoGVXnw/TPE8t8y/hpHB7YLP9zTzR5cTZrRaNjFkIiMWXMfBPOhAkfADRLP0oAdFPSinHIYCiWdkjStNfZatg3i+M4xBz+tLm/KxUy7QJSwP+7pACg/O8OxBA5TDnNeDYgVj+QYyad5D/B4PHnOfsGryE4nVk7c0pBpESjSFVQv1Rk8FUuTx9i+CItXxWQzQlLf9rr+3eukojMJAgALL0zxmLSk0mXmSnhQ2Zl39boqd7Fm75I51I9cwlHM6JcSmhYFLErZxhYF7+rs4oEH6tRLmC6vhEkoiMVIRuJ2rlpo2aKt2EyAsSiVraorvlKJswOUao8kpyeeqPcXjRguSFB2aZXcFVasRUDauN5DvikBYeUMoo9FYbFXntXN4LEnnoxy9q1lBhVfL0NKwsRshoq2TUmHjEZ4JmZgPWt2lhcb6ZpcoiJJZf6UIVbBd2rG0ileH5cG4L8PMuArrYpjP5buCQBvJjW9CBjR1ERgCdA/gxs9krh67iq73msRmVOQ5+sk2z0Trtbjr9gjC7+OST0KJV3zSmSRzFluL4nfaCKcEMxHyrhRljn5KZX012OMGXaz4BpVwgWWefdp2/x1xoUA6yOak2fGNJdNampe1eGBKy7oyZKAtrs9jx91W+DGTk96S3bCFkxa9xXVWm2Xqp4h4mhzPb7G/8Dtl7ySZvIQ07wh2NZW3Suwb0+EylbDDADfipSurtGiMykPDFWGgdUza8Gz7hLvoTjgOWvZ7kfQmB+jcciu8xvZd5og0TYeqjHneZfSh5yMdxUV9qCAe1OMESqK5s/CLcya+9j09bbLjqr1Y2gjYjBbA7l4bjKIntTc7LjbXHmCX3gwXbW0mSwzUQYlbi2LO2qf4NJopXt+EBIdIXMT+ASoYGyIuuY7MdnFRe8HyCFzALXYUzmnOCZSbwyCdPYVsc3Wo1Jh22H3w4HMiz7lR3nmziFia8TrBB+yB+i5f6ZiCLeVIF2ssFtkZhiRTmEaTaOlYmrSXl/vst8KsIRwHJP5dqKDmgcez9j6xHjNGCtVsa5Cn1c5IVaHxdvaU1hhL150ZmhBjHwYemU1wVazhc2qvWktuStgZAKYAWM3pROvJLw7+ZcOhy+2M7N++ANutL28uRwVM3uSILQkrzTOQOtNM07G7l52NuNtdD1prChM53J6nYzuq47BKtFBTZdeVwdfWwMEcYd/Fq8Wuh0S898owDPW/PQQDBuhhmZugm5ke2k7KcMTHiVVBLNOG7Rl9E1OD19piNLfv9shJLBHz2iYEdohDO8EasRgbwZGa1m85QaqUi7fg9EiiNROh3wZe8HVPY6CU3OYYPLZnJ54FubJRAeR3U+1onQ9dhidwHY0qInaLQoFUhQJHdrHi4PDFwRkKpORx/YcxcmvYvUhmOnEJLSs6EoNwbJSnHhTrkF4vOyqH0eSv5llkyzmnmGmjVXkByHUR6wkf61geVMUt2qpgzczU3VfEjO5VHyTefZ7JxLitibdgtOgcET0YKQuQGM2YNC9JxFkB7UE3HUEeqTnaB14g3B/vTkNvSoCUit/Ni80Jkz9rRXc8TBoog/65rLSUIW35DoKVRmzfWEbVlafvUXPyRyEfkvaeu1LyxIlzIDAtSs+/bZ6l8zNdNeSB5gPAbIciys0DgYB5Xt7dmSp/jcMEQiGxN1UiDTkc6WFa5601etpabQYL0f8cibqDWs5+8R209iMDO/v7NPNaczrwTqwCWeedvnsmUGbEQmKNwCdhEoN/2llNDE2N2gIYlgNv9S5LjAIMwg2tLgObmJ2Fdmma6hC1mHiZfE65Qq4xRTuv1XWquR/7DnTz/C2HkAIuShDT7cV9o0K/TWPZAz6pBiSK5XFfIt4TEBWskgYQT1udJkNMNLMfPrN+PK8Zlyp1c10eTEr64k7D5wsOgAg9LXAsA+lvt1baVGVLl14OysJrBoLOxxXQ3O6vw6CyFS7N8vwJHE8tq2WrBoC4Lkz+jkq0mSZ2UKHFXacpuEoVZO1kBthZOc8RpgkFbywamBgUlThk/CHymgE16maC8FI27Mr2ohPgj4UJDAjcPWOhtv+3RHFj+lJZGdrHju8DubXK4v3qXOVUTI1cEaKBzbjWI2TAHyVpQ460wBxdwyF1BqnUiNSTXxCYmJaNJac9sJ/JeJIpxd1Y0VERUNAnoakf98QuiobpVf7CZyhn/UXEChNGwaBQ19qZy048yb7989HOz4ouX18g52XCSdgXUv5+ccgyy0CzRCMzRkslYCZfUw1Emm/jdNflZqW6b/AtTpt4aOat9WwsCTXHAths0Upj4U5BcwyxfSGNBmQ5sSMk3G8LBquBSLGcyThtXW3BLuPMPDo4bA5+tOrQkSa9jVluayc4TR5SFxtm7FCsR9UGCzZNattvMGZpe1tPgpVqrX8BRIXeSvhmuWNyjgbyQkkkPBvLZysbV4KauDmqoeMmBdkC2VcxBLpux5VTp2AR3YpckyLUlO3JEIBOOyRrdxdiVZhH5ojsEyGd4gg/I3LZgGQiyAXpCvZI4Qi+hUwIy/Ngu26u0OMgpuUwwRkXIZ8ExOmieKMm/xShas9sLfhjoJHh+dxpArNFi7Wbgu2M6ZQ7WB8ZSr5Y1AvKt5jOTpAcbH8G7a/xGQHpO9vFyuFoJMDk1D4ZAruyqDKcKydsv9CdlZBthylp4fPYqp1lFBVRfwX0BQLrWzNhKREpfLEc0K6JxF0yOZepOM6IWsT435U4gsK62rejH7/ONfbHEILJIAXqr2WqrSmqLwBzX7dQV6jAoUj+NqERtixjRAc3EwoQPFlNFosPu3NWwxIZexN6OVD0dGyqK+XNOV4eFyIZ8udjDxQZj6bVjlcy2XanIosvQIcg5Opl6tm61eLva19XjtSGqziSFEMltfB/DL09oD5kKYCyG0IHzRhnvrQ8Tytel6RXm9Gt6r5epUdnMx+tT8EwhTXDO9mvRWwzuh8NguzlJe7g3qj2gdjSKwF/l5BukCyxPedMeaBkKkXMUcqkpIU2bMVznfeaFghqeon56wajbKCI2+JMWW9fBJ0RmBerGqNFBJBGQv7d0SSpv/P7ExCGj5itRtcK2ag1pos2jjenuPKuPcQ/SLne7SSbi4PVL63/4IKzm9rKzoqz/8FsBgoNUk/2ak0x8ejvy1rBoGe3Fc3jHoPcy/wFnNDVEUzW1WyZuI2YLciCnFw32Mmvh4qJYxU7kEFDa7omqaT1u4z+YfDNuv6b7JnUalenWTJ10c9X2gimpiA7n1pmrMtLSpucBubYK6SunYlLbD8wFV3UyRp6Uat74UqvmY3+rdxmrHEgUBuGEo1ysKq8DaDSrXalpMQ4zadoMfYXjPOfl0WJuaOFkzuS78cyjBWMG8zR28CMIZTYd6XdWYuBLM2FQnGvHowAkA735sbaSAd49kSuBfM2BMfBcxnmYgG9dIZ5jRT0cPvi90TyhEtjNb47ehTcPMQsJAgNFrwSzuTXNSJmGQO95dDILjNP+Xgs1Mw99rDLMnUoSD9iX1+aMuD2G9Wwpe0HymDhOOAMP3XRM9CC+CLJ5W6eCctkN/mKeCDYVnDZ2/LItmy4aOu2MExOrfTUxHmU5lIpVwEpTY3oPYFL2h4aScTN+ENmtxKuSTCw6DPfdnyPp20y12ElY7IGyUc6y0py7rHkw+ThY/SVkde3jY7Y195frvx/UuY/xpmjVVfGJr+9TKIE6Z9VRI1z8WPDumjdTFXr7CxzbfChoeChhVqLFadRAqdF6ZN4a/fRVhPgFeX0IpaMaCMwJdDa2ptU1pldv/a4L1jHd6c63hHtPBD5KIRpOFbpVAdDqDy/DDSk+YEAm1Fc8HDmgaUMFKjmnBr1LXu9Ey/83Rx8EqnJ3l6/7/H3+r2PT1HlI1VeyzPZOBxHRU3YYiu6eSvVYts/VnX0SB0ipebYceSaSIwHd28qHSMX/i9DKav0qPcMaW76ExgWJhqXWait35PblOUsTnztRl8vuEepgdVT1p3sxBRp51IUS2yCyq3YvKEuqKZgNu/poTTVe4GI7ooMVsITemhw5jpB9stEeE/97lOO/XJB4Qp2W8GLO76furYbydQy1+yFLsR9EPpBQmGEwJeuJQmVuuY6God20nN4mQRb0DcDlJHLxyUn5IFr3eQaPpTVl0e0Pi1PslPsn5nSoattFCaW5q17R1w9/IBUVzqstrAVfbFoTQZur13FJ8hiqApYLIc14BX0LWbjxkeZFboFrsAFsHUzrtUl8RTjY+ymFXPGyn4inrxB1n3916Gzc8AuWyHLmLurF3yowrm7c20HO0cZrzXbzdznE7z6UJWIxhUY+D50YPLd9ZLeCX7OUJ88OzZ01Dbg5MhV6Hv+7kEoJ3U4nSYLL+FKKGyTLaoqxBdgq3XFjbgVzc9+TC0gv4nC1MCXgBFJlzlQW1TaPdzQNS5HtvomwTDmfxejhnD3ldoGps6OOeUUbUvwzUwz9Eq6FOEWuSpdwlJj3MFeMK2jgwcWrDY0rjS6QUAj8Fh56aby+9EnOc3ZIM1zcbNYgciRcnjMO44GtKS64jmmk75KjoUeslEgYSRWbq90eXfj+x7yhd9T6zXW98R743dE2Y9rTXRFQCeiZ/xBCZXDcaDFwCH+mNc7G1/subNy21p3Wpk3Q3wfAUOb35M9YDYDhKD56byb19pHJ8H8iDvWqe38OE0OjJIyIpLadq0TdVKt0t92pW7/1oAlozaQVwMPQV05Ge0eEiRCuI0gdh7h8OKgUo9JvfotsSjC2aOcEYZynYgcwGOHoh1kw88/7nqCFsL2xjOkg3fYcC/v3Z9+szwhj9cXwoyrWdVjzweJ/xsIoLP4h9M43g8s8O8JNv8nPw3YMiR1EDp5ZsaGW7HaGts+bN+XuJCIYueO3ZyHFpg7aeX8Gl7K5hmIM/n1aQlcuez8j6E/DOTGFbku50eXj967IR+sAirXTP6p7cR5HedcKrxnXv0Z3AGat1M51i4Yhz3kEcr66FT1ajKvM96gpwxlG72E5P9QvGi16iuEUOigPolM6ZEErrwQC2eEkse2cDEBbTuNu62tgzqxshgx4+sycDt1f6dlFBXtXFygm/IOHm2Wyav7OWRLg/j3hLvoDfBqSyjHeAqXKTPnApDIeB6afl9BeM0HxL+8jlUytzM42lH/Ri1o1xsqDscxYLdxNq0mex4ZaOeKBk9wfEOgTwp74LReoAMsEwbOYy5l0GDCGsgWmrZC8U5V66Qj7IeRUcrm3PX+dXQuCztSJ73EPbj4W7pAe8QVBg48VasM7NM+opIQLsZPNRg5GgNLTxwNkTEy07dDXpAM3IbECxBuD1kuoG2LCFprWHxLislOalWxSim6O76yhHQVyjz9zl8/z5BJplAlWDSspmiCWnP7qM3CXJ+enVmOVG3c1Js2AunleLpMkbd3+3gwFV0UNLjviMtvGiUkTWGgo+jtEdxTtN2d+/Nbvpnn+vCYesjMRoi1T0VjijNCO4JUhkaC50h1ubAeN4w6xSbsGzhFUZA9igt1IAv2hWy63IFW3VXuJty0+UUXtcpJnqsdZYOD8PqKlDAy3af/Yn2NXVopYmFCWEsIIyErDJ66PMoeUtmJ8Kg9Lq4dl76Q2nMbywf+z19h4d84TtAZP8UPJJAxHnHk9tqGNqyDNXEV2agbYlOWW/oSmFSb0BzkpRC//Ry965eNqbbsN/QV9gbNxWACsJchzQmzxIO8aA744bQsJtRnHdPxHbAQ13RubfW5ucw2MURZ5MTpZYrU+M5burVHiuMX5qwFnVqna8+07coH500hGTe/MgNq8HFRFzYQ2A3CIEXMQZTpd8wTQ+q4IbX/MomsFin1rsMxavARr2WDvGG8AQQvEdFyck63Ew5NuvHyWzxqm+trWLCIFhSamySwmGlNN0o6n5dAtULtdH3DSTRruWj6a6BIGYXlYtQMPVPWc/iwL80g1h7lSxXx5WfyNpGlXftnZP+WBqeULM7JA4eWY69rLVgBmo5tTf90Ju0HdF5yv4PPQm4j4vXMsfMPC9D4Ygrx6oinbnD1EuKdZUh0r8QcZQKXRiiG4fVaxVvWQtJWf4ht1W3ueWiu6wrSwgbsBC8bRgorlVxnIDa8DinzeC+UmbEAqM5obpYv0nzDkooZ+HYDeJGbgIQdPNall7pOxoWMIw6y8KiS1z2AvJkYS42F7qCiODNk4NPswzfDm1r87qj1y2b7H/DnXfzwSf2e//9F/v/YKNqzSdsw37S/QrNBOWQyU7LrsJLjUtakaovKu5iUrDdX4uGeJTzEIldguM4scp2tNGYiNqOjpf7NGcB8FRJbgcv71etrcePMt83pO6LhT0q/ZprI6cM0sed5guzBsm+y03ookGPpl0kNwvHMwJr6Fa8nvBNdINRfYIACWGipwN8bU6j2V2t4K36XgBcHXr4IIWA64IziFZMIxOKRJ7FDiqvK1Ffw4lcklR1FcnoSIuW7Zqcz2/b7qzt9n5hiYJVS+YEAVbGGHUP6D3FS2pU3WnyRJTrFkSScqV1PUuSOtjTFphqfr8GLj3jdjW9LX0BuYWHkHfNYqvxTEyHMnbSV5dJ+1t5oWXB4JDD/cFS6UMDMQPkr1byV2i0vzCbRA7JA5ThHSkbYIH4Sk5uPIrksvo3j6eYIi2niso3yWMS05yUCbSsrHP0Lj10BAlcHlFyClpGao4vXUi4WyxIIscnYrO4DA5F0yiP4cfrJ1L/eZtIf1yY+a8s3wY7hIitaGTncgz/DMty9eBEhMP7Z725NsExcUVE2wWuj60cis+63urRrq9XZw7xE1sYibw2NBHUe+QQoKwmhNuQbd+Quc+r6+QSKEKmY32oiiWKnAaG28QYmMvqKr96M449PSsRh4HDaqV3p4WP3Z8He+5HtxvP2+osu0k1/JwK6pXcCY2kTHYsnM4Mjk7NbiyN7nRNkvhHY28TiZSzpxc7OfNJUE/gpqO2wrmW4mHPbaL3ihNSxCd4TVEIkPdbRzppm11cQKyAeV9VRyUr7g/yen/odFlk2OaAJ/XjRO7nQWvXTwLCwV2BabP3bOgnHBzvK8Oi6jy3M0Ra3pWNB2K5sPp5XQdF0iW5YGR+vK4fhdss2YG8RXOlLfSkGKpeAe7hRM5zR9CJI6ZuhK9Fqmz0XwiNBcArZqJynrmYWBqvzGuDLTw9hZmUEgt4hX78cJ1efHsp2NzMXhaAjPVzsPdz2ZwU1fh9QyNlxHLQ169/a/U6oHHpcI4lweejPqUzSNL1WrDCvUBc+EWUwacefq5M3d4S4cV4ZfF8cyP1VTxNqx5fAjN+um+JKxRvbhLI7KNilzFl/QC5M2UDaTy6uj09JQJlfiI5zqGSMkeI+Dfn6sL7MD53qQxuVe2+AqSZLTwY7qjdC6MB4ZaBu0pPmbBSJpB5CQeLpOEVbNsBmilCFp4ljOe4VcQmZbGnUEnpKaCY1i4xhQnMs2yYr9LkoDFjnkff2djYwrDOWgAnmQI6ERPI+4b1OgZmlER8buDiBl7qPGhJ9RAdYA4KBmSrdXcZ2sfxdIsJ+VTWmwRgCkos0dWy/MzEvVjM3qZpkqGbGNIXmYySxcD4gisqzRCLE/2qIpYJ1b8/DKFYjYi++mCF0chno7+H129rOfQHfrEYyev+L822mJq9YXxkMJ5l/Mgue086XQm8yibrZKZcgq/SJt6QKGlwnnD9NMkEIWteon19Mb90MnTvBkqDYc/RD/Lg+Sz7/Heo71Nf0IY3cxjvsdwTfkX5H+OpvP/SMc3sYqLUn102STZdG348KpucwtQdcu6bvvC9ms0kYR53eejBQ77rL8ihHV1zYoIkJB/q/S22OHP6oTfnNin7zLxsJCisAUHMNkUFjhmCBFYING4IdO0J5lQlV2RMcVCfU5khoogmhmWaEFtwIbbUldOBB6MyPECiQECyYECqMECmSEC2aECOGIlYsoadehHjJhFSphAwFhH76EwYZRBjmhBjtlJjitJjpjJjtrFjogljisljpuljtjtjosdjmmdjptdjvK+GEU4QzzhDOOUe46CrhhhuEW24THnhBeO014V//Et76SPjiC+G730QQM0QsxAIRa7FGxDaISIXsRCrVR6RyDkqq5CTikJdIjQgi9aKINIwn0iKFiFs6kfaliHhWIhJQm0hoXSLhTSYS1zQivZpJJLE5RJJbSCSzFUTyW02kTxuILGqRZGWrJOvaICmpRLK73ZIznSFytatE7nWPyKteEfm/t4i815+IZPc+76vkeyBlrswRZVdZoipWmaiqVSWqTnWIal4LojrUgSjvvEmFFEIquhhScfUk1bsEUkllkCpqOlEb2kUMSSdZMaSfcTSCBhqBTuBACmVIP9lI7umrQjAY+p3+Z+AZzBjquhRrfsZrGoaccawQoA5BnmfPb31CaJDxc0EWTTiDLkp1+iLEyPGUe8eLlj6N88yzcV/6fhvs2yeCuod09J8bPKIZLnxkPrADKEB5xiloDJTCBCvJ29fnkOeF15YZAGGKyGfjKP3MEKJlWLQmkWus34bH7t6Z2YeOUz5yjQ/7eOWXff0B+7Gf+7Xf+2OU+SkyjUpV7tRRPHLL3oVoHLlGj3o24kv4wcmllFpa6WU4po9CGNSaNQIsdx3UcgWb0+hmOGVUOwSh9+FC6t5ohRxGN8s5oG+DYo9Tw9hTqP6q8a0oQ3lh4EZ7Sc0ZDWoF1b1ykoDHQE0XQvctMk/l07I2AdkCJ0q+l3Mr1Z3RvwfevhrlwWccWwqffRdMmbNgyU4tbddpyLARkygBEplCG33HZYiKy8iqqssrawFBCBQGS6TQWEamZubWW9pol90SJLIT5MrN3O617jx48u6DjsE/sJ9gutnmWGSJZZZbbcO6iSmo7oV4Url33pg+YtgFzKheA+/wpdQQPCV7AAlKUgm4ERIxxxS1Qo3My/lRD1o5IvcZCboegHNYntXamtKbJMpn06JaAFICNzOCHgQ2V2klUGQNkGS+sB8L5YxcOaMeJSRDqUfEWFcGn8B5adWvKK0TsT4mWKwrw2b5kqTxc5S3lM/ymMbgkZbBpsU1QZ3I8TLlJ1HQh2uDta6bOrYppJOsm5xHW99UWlK2uoTHkd0nDO5ITiODwQN64F5M/Gjs2C5miFhgsXMlzgemIwM0CVcSSkAww8bpqeLScej9gGLWmYrVpNAHMnPcmmVBRU9umf/znT2e+M7I7uOA2exVxVKh/t44W32sG6jypVuDB8HjYy3Cqu426+RxGIED4050XHIqhQkWacARjBqqe9Dsl3jWM3Nd+rAftVnOS/w5wQ6+6Pj4dBZYYoU1NmzZKauc8iqQsiu7rsx9fpXJL9P8MstN6StX3M4zCph4Aico/uvJvjhzjsjMYeFjsjNZ/g694ll7TWEm266Nz2BP5CGe8M+9fkYeV3aRStzaNSRk8WB3uvKzfZiVxJt9XXwOb//sweE+x52D+v1P8cNkhJcz3PLZUmIHAmBZlqfAbLBWfA4I1qCipoGlWIZ2tKINS0s5JnMqQLgDrqJtMNDE0PT2tuy55Uon4Yw5c8+pG7otanO73w63I17a7554X7ujj9XHmMeJV8evTjzrTY1P16fPc8CzmIajpKi39ljP/8NTqigx+YpIiJXYZQ/kCYvMH5uYWtKrPP2TT406jW9y02uMd/nhRcNO2QqnN7zZrW53M1reto51rWehEzIoM2VTheyrWf2ccs0t97zyKaiI4koorZz6NKgRjWtyM5rb4la2vi3tal+H+k6TIUuOPKGRsXFFCeMJ0yiZuYGuAzbgwIUHHwMMMcIYE0wx8+dVsl1LGw7iEA6jgCM4iiaO4ThO4CRO/a6eNrSf+PhXd4rhA7JPfvek2XpQ7umf3gzbDsk/+9uXZfthhefV/QPce0TxxYHoIPcdVXp5MDbEjmPKrw7FcwyOq7w+nBhm58xbnX73sXOR8ZTa3XlK7ekCpfZ2kVL7ukSp/V2m1IGuUOpgVyl1KAelDuek1JFclDoaRalj0ZQ6HkOpE7GUOlmAUqcKUup0IUqdiaPU2cKUOtdSzvcgF3qUiz3JpZ7lci9ypVe52ptc6734uk+l1I3pRP1t8Q/+xX/4H2/xDu/xwfs4XLuN+OMNessMA4hcxlY5VdTiorl2Orncla51i9s94AUve8WbxppkqhmWWWW9DXbY56wLrrnvH//5yiQDWYqV2Kz8qs24Bmu9tmu3TvOaz3y7/P81fklLX8YK292e9rav/R3oYIf66LOvvvvpN3WatOnSZ8iYKXOWrNmy58iZKyo6JrZAwUJxheMT+9yXvvat7/3oZ7/6fblera60018NbCgsqA0KIOwIzgRoRRB+5zJV2pxYvlfF7hIvrrDCwHjT8l4gYWCsqXktoGh2JsiOYuj/Fu+SDhRmlCO/eGcmiDCIBUosERReQQ1ipF5KB49w7XKmCAJaz6OkfNW2O+4SOelyrfid5nMRKH+Gbahb2YkDnChAN55Uk1ZlpnaGD7QZq/7kQitBLfg7gUrWbseRYAdt5ysU+3w09mwruzuiyzun10DiwK0lOZ+ryhrsEyfluka3tNyn9eN4Zgzvq4cO8WaevPnyh4aFR3StPOxRZ+9Z0Q5RTtrSALLyXu3PBDdZlu24nu96fhBGcdLY1NzS2tYOIMKEFghVNrRy1VyVpt1x1954l3f5dVRtZ9CumqvlqjrXQ8N2hUX1DRiw21inzWkCV3ukHspWPR7Fb7H0Xkykdhlc+X4sRUTlO1Q+9bv6TjFDZm5W0NCdPVxvf3+DxG2qUphKyrqBXmNdH8TBLBhqA8CP1B/z9QcAAFetCvejP+N/37r/3w/XNWsbWgSQ46aCTjQQoADdQKCen4JMEzRmf3pi0RBKGtQkySFaG5L3hm74xmzCZuyvLdimbdvROYYttMhqrlr1mtUyz0IKL7LoehZfSnkNanxFzWhfJ8MmVppb2vJFRhduY9MmNLGpLWlNmzrdWG34MCIEEo0uIwGAUOyx0007qP1FFmvW67O52WRUDOw48RFR04LgOCY8AhIEMsI0ate1wuZUaZCS5mmTrukuvab/ycVi42KqWl9YS5u7aYOfqB3FUBINo006TGQqBwgQo5532MBO7I0BzIMFsEKmZ87p8xHEdv8bVFRWsyqSatr0W52GIuR/Z3VuFw9FrZj/b9e9X6uZHpve9d8aN7Y1d4u0XmyVZjXj1YKNb/l0xxN+6H4p1eux9MUDaMIeSMmY/4/vxkcKlTJDzwXoU1tDzly1GB6/DU/d9FZggglTdv28FyGIlMOrsJg8QEnPliNP/qqaQDSbz80/XF6CGYbsuNLz19A5jPQhLgRByBQe0WT13h4MssOtN2jTZVJzLyFKKb+Yg7Ov3o9YmyElVStDqEG48zldMCS1eP4LvOsOjX/ApN/FPXG4qAEFucnzgkgv5hLiJKvpc95tvdMROjU8thIXuuCFzP//f9iXPwX2Pqmm2PlTAOyZWTnr37T+A3f4x5UMXHt2Sw36X3g0/Qc2XDQnXf4w0+Hek33K/mb2s8cvLlecPQQs/E2jtNnO+km/ZvH41fjSA+huAFjwKG1J/QCwcIj6Pc1L0wEWHE0FVBDlCvN3kqGAuYtg7oIb/YaHubNu/DB35g168wf+gn2HaWyYe3+uTgCzFh/TgCQJGpGZjgKUQ9fnZUK5dNku14WivLr4K3oVDwYFAAdGlLdeUXZWBpPcKn7He8TUYAOIO+JtXwOI58k6OSfvzDhvah9/8AgJJy4pr6iuqa0LhCPRWD0609jf6nRJ/9l5+QXD2YniSNI9HW2z4bIIhUypZTg4aM4qRVuo1/BHjo2xJpaCPG0Mf6xfs96uJvRr21tVWs1ChfupYzXMiEktULCzTW9mzi149H8nu/R7hfblYe3RWzmHq+7+4ihSv2h7qlukrc0b2roKYi3KHLcV2t7attSWctqVQ16HW1l6PzhdtfFsYX3Q8LpzH2XQmGBFaSywpqJGaqunPl9nO8/5ukj1uAc94jmPDk/T1zdm+stcGw2uu0H2O+SUw0447bLnHnjsSYggWgzca2rOa7jGazmnq3jNF7PQRS5qmWuzbHU4xsAB5hxX3kWVXFHZVRVcUtV11dzk6IU6HmrgqcZequuR7WvlvRbecvNRax909FN73wQ2Ar+G0qX++DeM7v7wbCTB/UFoPcEis4uuT1S9YnKIyyU+VGI+CWHSohXEyywgP86AVMNqb0TuhtfB6DyNq4uxeRlTZ1MLMCV/k/OztN4W1cPswi2pl4XFWVxPa0pRUpZNXtTH7vrZVd8qajBy1pQT1+FJ2lhuvfCsFhRrhSfldb6/mt1coxy0vAFkFTSnCC29U5ggOYIlJ9k4o1+y8XmbViB3P2wr3/lc3TUj2z43y1QTTDNTsUky8SQKVR+LIRP0kL53QHFv32L/wHoYza8sLK8urX2MuPNxvX6bsy7cFqvHQEdYahyeIC1DAag0BW2T0eH1BVv2Xrp44fqdux9BXnJvnY+46v5N27p85fa+3SfOs4Sskf9/hf1Y4MeRn/TTL/r5V02M2ROOFM2wHC+IkqzoGlNnG1yTbwltsSN15Z460Ia6f2ycmKbmmWVuXdiWoX3l2HbuuHbdAU/QG/KF/RGp8LWEfStx30vaj5L3s5T9KnW/S9sfp29JlgqVkajMlMpKq+wMKmd3utyz/mjiHAe3VHebvRua+VdbX1hmD4t9Z2t2YquiZw56VV1SWuEGpRtZRxPqqqhuigsyvWArS7SuNKtLtrZUm8uxp/5MOaKhZ5p4zafB5BYxr2hbyrW9gsUWX3LtdVZfc601tmbrJiw0eYc2duM3ZqNmoW03QGtdsjVbtw3bvE1bu/XbuGWbuklbvjlPR43TK+OjguasPdlwYeHB0tWvvjB19qNPSnsLE6A8NyH8lNVBb/591aPfQlXWXi++fRbXT8EqcVRVx773kScHJl7seQjio7Pq7LRTTSc9de+bWDV0UYV7fxR4MaqoAe1g6Nu/VP9ekX69FKlb/4jQtb8liumtBNH9j1K9EM67N+JF9Z9aaqqtjvrqqctZS64aMbOyMrm1Ym5nzvZ9p3ZyJ3Z8x3Z0R3Z613djN3d4D/ZoD/dkvquttMqKK9vbABYADaYDQGcAY7iJZGqgnUBNdCSohW4JaqOHQR30KqiLTgP1Nh0F6v/eALoTaIh2BY3QU8AR3RA0RrcBTugGoMmmWwHn1XpTu8FttUE3Am3Rs6Adejq0R8+EDmhn4K5OBR0JU3mwrZNyeapSZ7Xy4lIXzcd70w50pVPdBNVdSD4i8tUjP73zl16AgRfIZcgFw6hCTCrUjMIsK/xWtRVp/UXBjommhe4CYtCtQSzaG8ShF0APtAfoqaEIelFiX72dLd6FElwr0f2S/FOy/0rxtVS/J42FiCWQjtiADKQ8yESqgSzECLKRBiDnLUstd+U9pO3JB9IJFCC+oBAJAX2QeND3LfLrt/o/JP0MAFIIBqI7g0HofDAY7QWGoOfBYnRdsATdBCxFDwHL0ONgOXooWIGeCCvRBWAVOgOsxjAe1qAzwVpkJqxDh4L16PmwAd0WbERngRIM02ETOgds3vRfsGVtRTuAbRgmwnb0StiBTgc70S5gF4YZsBtdDexBZsFedBjYhzYA+9EAB9ClgIPqpiDv3J8stRugNFCNBmnQYDUbol5DNWyYlg13QCN0u5HbRM8bDRc1xtnGGue8xuvSBPc10eNN8mCTPdIUzzXVozNtl2lgOs80wzfN9KlZZvuyOf5rrpdm3lZ3MJ9BLdCnhfq3yPAWG9ASQ1tqxCxbTADLH8qtgLlW3qpW32osmQBrfrHPvOsSfeuN2bOB34fqgY3IGWxCDcFm1BhsQS3BVuQEtlGKwXbUHOxAMWDnplCwa+1GkWAPygR7URuw76HsAeqABAZDCgLS0BcyQF1QKRgCmUBzqDSMg0yhFVQGJkJm0Boyh0mQBbSALGE8ZAVtIWuYAtlAe8gWpkF2cCBUFpZC5aA7VB7mQRVgP6giLIIqwUFQZVgGVYEeUFWY74hB7KEVpBq8hzhAC0h1eAsxghukBnyE1ITWkFrwAVIbOkLqwE9IXWgPqQffIPUlENJAZtNQ/CCNVHocpQuksWScxB/SRKbjDN0hTeEPxEU8Ic1kPq4SDGku62khoZCWsv1qVdlpLZEQN1WYNhINaatK006iIO1VcTpIDMRdlaejxEE8ZD+dJB7iqRrTWRIhXqo1XSQB4q2a003SIN1Vf3z+HhP+IZfxk0yIvxpNgORDAtV0gmQAJFitJkSGIaFqP2EyAgmX+0TIcCRSHSZKRiPR8pwYGYfEqsvEyVikh7ymp4xBeqnz9JapSLwCJkGmIInynySZjCTLb1JgKZJ68Z40yCIkXT0mQ2YjmQqfLFmCZKvX5MhCJFdxkyeLkXz1nAJZgxQqZfpICdJXWdMPNiH9YScy4Ko5AwG7kUEXzmDALmTIxfkZinxmOJSFjIE+kPFQAzJhwwiZvKaAM2QqOEGmgSukGB0NmQ5tIDNgOTIbAiBzJBzyl8rNAkiBlMgCZJNiZwusQLbGL9lWXoc+h1t8jqDZX0ebO+ehFMgFOIhcFG/IJam5LFmQK3KcqzIH4X/imiLmPqyEXsAx0EvYAL2Rp6C/1Wy+yj3QN9WZ71Af9AOGQT+hEfQLRkK/4VnoD2oBV4L34MrIG64CH8JVUSDsAKfC1WEX7AL/w81QPtwSWYE94TM4GMbAIcgVDoNZcDjMhCNhFRwNy+GesAWOh3VwCioDzkN14UHIAx6PwuAilADPgK3wXjIb3veO9E68TqYmn1uGTIVvkwnwHTINvktmwvdIMXx/yyQUXoIyU6ly0xkqPCYg+SilSQaKKUlHMSMFKOYkG8WC5KHYkb4otUg/lLp3+qN61W/gcQIZjDIA70IZRVJQRpM0lDG3i9C4JjTxwhNNaXJTmnrhiUqa1pLyW9aaRrW2dRW3vo1tr6SSNrSpTW1pc6ebcc4Ab0Q5izejnMNbUc7jTSgXNm9DWIJWIgpdRDRahBjQSaTUrRPIJNNOVyazjh1zoHOIBSpBLNF6xArtRqxvHUI2lW1e5Srf8ipUudVVqUobq1qtNlW7Bu05DYGOIo3QEcQRHUYa3zqFnGrS+ZxXs4dL51rzbGpR68rllltValOn7POsa3VPN+AmSHfshPjgxojvZlfEb/lvbo0ErEBshwThNkgwNoeE4GZI6G0XFFZEzYssKucTDdwKicFVkVhcCYnDdZAe2BHpjS4h8bgtUoAuI4W4HTIBbUCKcGVkIi4FmYRzkcnYBDIF5yFT0WJkGraAFKOlyHRsBZmBliEzsTVkFrqCzMbtkTnoKvIX7oDMRdeQedgdWYiuI4twR2QxuoEswR7IUnQTWYY7IcvRLWQF9kRWotvIKtwZWY3uImtwF2Qtuoesw97IenQf2YC7IhvRA6QEd0M2oYfIZtwd2YIeIVuxD7INPUa2Y19kB3qC7MR+yB70FNmL/ZF96DmyHwciB9AL5ODmIOTQOoxeIkdwCHIUvUaO4VDkOHqDnMBhyEn0N3IKhyOn0T/IGRyBnEX/IudwJHIe/YdcwFHIRRyMXEL/I5dxNHIFvSVXcQxyDb0j13EscgO9JzdxHHIPfSD3cQ/kAfpIHuKeyCP0iTzGvZAn6DN5insjz9AX8hzHIy/QV/ISJyCv0DfyGicib9B38jdOQv5BP8i/OBn5D/0k/+MU5C36Rd7hVOQ9+k0+4DTkI/qDfMLpyGe0BPmCLSFfMZBvOAP5iQXyC2eissEKKluchcoOa6jK4mxU9tgAVTWcg6o2uoOqDvZCVRc9Q1UPB9xbVpwgd7oKylHDkWYgmsOZFlCJlnCuDVSgLZzoAC1YHT41QivWgC9rQ7d14L8NoQMbwa8u0GszAsoW0GdLAmR7GLQD4Ul3GLIj4U1PGLczgWcYTBpO6BkFU0YTKXvCtL2Ior1hxniiZBrMmU60zIB5M4m2g2DRwcQch8Gaw4mFjoBlRxLzHAWrjiYWOBnWnUIstxgOnE5scB7hzIUw62Io6ucSOHQXVONueHAfNOB+ePUM9HiWGOw5mPA8EclnsOBzYpLvYcMPxAq/wrbfiNVVNnduxQJ4CMzqbzY2K/o4lABAjotbgYdHHgKhQKE0GMyPSKSvUSi/YLFO4gkkGl2tWSCl5as/GFeim8O4ET0Z4+63lvdnievIpo0wHn2dtNmdKxY9AuMtdBHG2+ixGO+ih2O8j56A8Sl6JMaX6PEYX6HHYHyNHoXxHXo0xg/owagxcWsyVLAVOzsDBiMgkQ4KC9M1NHysqekLbR3v6ZroI5NM9YkDDnjXccddcMIJp5x00hmnnHLOGWdcctZZF51zzmnnnXfWBRec99ybufwZgIVjhhjikD/84bAePY6AQDZycFgPAI6KcjBYaDRaZGtrroeHGT4+5vSLKLPRdR1lILpuogxAd5cmEARlRFFbSVJBljVXFNaqqoWmsWkHohIXdO+JBXSfkGboPiWW0H1GnNB9TvlF9wXlC92XxBS6r/g/K2n1sG8QewMTnJXcbFRjp4JeouojFwdVAMpxEpmL/Nw0yEN5XvYBoT4o+4NRlY+YcPIhaABJWRR7R1MPw374qSxADMH6FiK2MAVF2BeWveIogicegWBEcpKIQ6YQhUpUytAoSic+g0iiP3kRV5zCEtQvSWkp9ilNXRkSylJcjlhMCsizfwUqKlJMiQTKRFchpSqB1UilThANdqXJ7rQIpM1edNilLgGNZc/GsQvjf2qilIns1iRqmExJU9iNqTRiGnVMZ49m0LCZ1DaLPZhNgGMOezKXnZtHdfMpYQG7tpCGLKKWxezeEhJbuiWybC0niRWksJLkVpHMajJYQ3ZryWIdqa0nlA1EtJFwNhHUZjLaQg5bCW0bUWy/N412tL/JcwBs2UG25BBbdJgtOMLmHWVzjrFZx++toBOdaq3TnW6mM11rtevdaLuHPWr3vATb94odeseOfGSnPrMDX9ixH+zEb3bmT7bl722bz+DXEDTQ9KY3dOGJhpvT3EZa0OLV2S55qcZa3JKyLW1pqZa1rEzLW16yFa0o3X/9v+T/314w/1fE+fkmbhhqAP34tfBv7zdA5hBAw9T8DRrbo6ntXwqt6gIWr318jtfvu7+43FU1UXBM8PVbcxggzhDXtufdwwvrO/yWgjVxKIY42GLVSvDP1wC8SvVsNjRL3n5t3IPft9XX3T+3/5N+XXVCbcjmIY+u8sbiSa5z0Fa/23/3L8mzaOWdzXvf+e/u9qmQ4zw9OePhEthjl5+XbA6T0DbkDOOGus2dq9ffOe2IeOnKhJm1Yb7vs674gqwUZNCReJ7HtxlWiTLUdMudtYaR5pzna5/laGh0Sollhi1v3omxuTNvDPVnOKWoQCpHZOVq13yWmiHOJxSJZHuVFF3JYI79JTQEs7O4s2tkjqwiKJfL0CipN3fyc/3PuPRjiP9LIydoxFAGOBXpugj23KGwIgYad/fDgKO1KIWHqTChYaiEMlQKHrBdM1ybCAucOgpLqdlnWNFi6F9llG3aN9k+SKDmsBWh/OKyTrLl6C9PqmQpChi5cF7iaPrEy1++KyNviTIkytKLUZQUvWRJ5ilRjl7yFCiUJ5GRr2xZsgVJlKxQRsl8HeCtzTlz9leG6j7Pz+bXwlU0RvEmVUb/+DCJ8uRLLU0a2/7wLjL0lyNFPqNmnEK7aWrU16ztimk1kCSrEuvYLjiN87l9D9HqBLbzMr9xJ/GyZWpCL6fw9gY4UMOQbuoCul4sVxUwCn5wkgJ99dKHirdnSBVv2vnx/gmMCmXJuT2PUUETU/n4rnwY+cuhMdZJn+rQUVLYhsQoSmgJIffvpY9eUtUb95aRHfeVKsEUTMvljgJTNA/dclUZ54vv13aOG+dzEtDOsM8e2fIka8KfF5+KbifbzefrxrdfyZSzzG4vxbqdFhMWpHlKGipNzeJW0unvDND45VCXzBU=) format('woff2'); font-display: block; }
+/* PIXEL HOLD'EM, direction A "One Bulb". Tokens: DESIGN.md section 2, plus three unlit-wood/slate steps. */
+:root {
+  --room:#0b0907; --room-2:#140e0b;
+  --felt-hot:#2a5e40; --felt:#1f4532; --felt-rim:#10261b;
+  --rail:#24150f; --rail-hi:#3d2519; --rail-dark:#1a0f0b;
+  --text:#ece2c9; --text-dim:#9a8f7b; --bulb:#ffb070;
+  --coach:#11171d; --coach-edge:#1e2730; --coach-text:#cfd8de; --coach-dim:#7d8a94;
+  --coach-smear:#151c23; --coach-ghost:#1b232b;
+  --paper:#e6dcc4; --paper-2:#d2c8ae; --paper-shade:#c9bc9e;
+  --ink:#1a1410; --red-ink:#8f2419; --blue-ink:#1f4f8c; --green-ink:#245a2e; --back-ink:#5a2620;
+  --price-ink:#86560a; --loss:#9e2a1e;
+  --clay-red:#8e3b2e; --clay-bone:#d8cbb0; --clay-edge:#3a1a14;
+  --skin:#b9805c; --skin-shade:#7d5038;
+}
+html, body { margin: 0; height: 100%; background: var(--room); overflow: hidden; }
+canvas { position: fixed; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Table at the hero's decision: a paper slip under one bulb shows the price; nick your read into its edge and it turns over to show your equity"></canvas>
+<script>
+/* Departure Mono (c) Helena Zhang, SIL OFL 1.1, departuremono.com */
+/* PIXEL HOLD'EM, direction A "One Bulb": shared renderer.
+   One canvas at UNIT resolution (1 canvas px = 1u), scaled by an integer s with image-rendering:pixelated.
+   Type is Departure Mono at 11px x {1,2,4}, thresholded to 0/255 alpha so it sits on the art grid. */
+'use strict';
+const css = getComputedStyle(document.documentElement);
+const K = {};
+['room','room-2','felt-hot','felt','felt-rim','rail','rail-hi','rail-dark','text','text-dim','bulb','coach','coach-edge',
+ 'coach-text','coach-dim','coach-smear','coach-ghost','paper','paper-2','paper-shade','ink','red-ink','blue-ink','green-ink','back-ink',
+ 'price-ink','loss','clay-red','clay-bone','clay-edge','skin','skin-shade'].forEach((n) => { K[n] = css.getPropertyValue('--' + n).trim(); });
+
+const FW = 480, FH = 300;
+const R = { s: 1, W: FW, H: FH, ox: 0, oy: 0 };
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  R.s = Math.max(1, Math.floor(Math.min(innerWidth * dpr / FW, innerHeight * dpr / FH)));
+  R.W = Math.ceil(innerWidth * dpr / R.s);
+  R.H = Math.ceil(innerHeight * dpr / R.s);
+  cv.width = R.W; cv.height = R.H;
+  cv.style.width = (R.W * R.s / dpr) + 'px';
+  cv.style.height = (R.H * R.s / dpr) + 'px';
+  R.ox = Math.floor((R.W - FW) / 2);
+  R.oy = Math.floor((R.H - FH) / 2);
+  ctx.imageSmoothingEnabled = false;
+}
+
+let drawTarget = null;
+function rect(x, y, w, h, c) { const t = drawTarget || ctx; t.fillStyle = c; t.fillRect(R.ox + Math.round(x), R.oy + Math.round(y), w, h); }
+function px(x, y, c) { rect(x, y, 1, 1, c); }
+// deterministic hash in [0,1): used for chalk grain, dust and ghosts. Never random per frame.
+function hash(x, y) { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+// render fn into an offscreen canvas whose origin is unit (x, y)
+function offscreen(x, y, w, h, fn) {
+  const oc = document.createElement('canvas'); oc.width = w; oc.height = h;
+  const sv = { ox: R.ox, oy: R.oy }; R.ox = -x; R.oy = -y; drawTarget = oc.getContext('2d');
+  try { fn(); } finally { drawTarget = null; R.ox = sv.ox; R.oy = sv.oy; }
+  return oc;
+}
+function blit(oc, x, y, dw) { ctx.drawImage(oc, 0, 0, oc.width, oc.height, R.ox + Math.round(x), R.oy + Math.round(y), dw || oc.width, oc.height); }
+
+// ---------- crisp bitmap text (cell = 7u at 1x: advance 350/550 em, measured from the font file)
+const CELL = 7;
+const textCache = new Map();
+// grain > 0 drops pixels by hash (chalk on slate). Only used at 2x and up, so 1x strokes never break.
+function glyphs(str, k, color, grain) {
+  const key = str + '|' + k + '|' + color + '|' + (grain || 0);
+  if (textCache.has(key)) return textCache.get(key);
+  const w = Math.max(1, str.length * CELL * k), h = 14 * k;
+  const oc = document.createElement('canvas'); oc.width = w; oc.height = h;
+  const o = oc.getContext('2d');
+  o.font = (11 * k) + 'px DM';
+  o.fillStyle = color; o.textBaseline = 'alphabetic';
+  o.fillText(str, 0, 11 * k);
+  const id = o.getImageData(0, 0, w, h); const d = id.data;
+  for (let i = 3; i < d.length; i += 4) {
+    let a = d[i] >= 128 ? 255 : 0;
+    if (a && grain) { const p = (i - 3) / 4; if (hash(p % w, (p / w) | 0) < grain) a = 0; }
+    d[i] = a;
+  }
+  o.putImageData(id, 0, 0);
+  textCache.set(key, oc);
+  return oc;
+}
+function text(str, x, y, k, color, align, grain) {
+  const g = glyphs(String(str), k || 1, color, grain);
+  let dx = Math.round(x);
+  if (align === 'right') dx -= g.width; else if (align === 'center') dx -= Math.round(g.width / 2);
+  (drawTarget || ctx).drawImage(g, R.ox + dx, R.oy + Math.round(y));
+  return g.width;
+}
+function wrap(str, cells) {
+  const words = str.split(/\s+/); const lines = []; let line = '';
+  words.forEach((w) => {
+    while (w.length > cells) { if (line) { lines.push(line); line = ''; } lines.push(w.slice(0, cells)); w = w.slice(cells); }
+    const next = line ? line + ' ' + w : w;
+    if (next.length > cells) { lines.push(line); line = w; } else line = next;
+  });
+  if (line) lines.push(line);
+  return lines;
+}
+const fmt = (n) => Math.round(n).toLocaleString('en-US');
+
+// ---------- bitmaps
+function bitmap(rows, x, y, map, scale) {
+  const k = scale || 1;
+  rows.forEach((row, j) => { for (let i = 0; i < row.length; i++) { const c = map[row[i]]; if (c) rect(x + i * k, y + j * k, k, k, c); } });
+}
+const PIP = {
+  s: ['...#...','..###..','.#####.','#######','##.#.##','...#...','..###..'],
+  h: ['.##.##.','#######','#######','#######','.#####.','..###..','...#...'],
+  d: ['...#...','..###..','.#####.','#######','.#####.','..###..','...#...'],
+  c: ['..###..','..###..','##.#.##','#######','##.#.##','...#...','..###..'],
+};
+const SUIT_INK = { s: 'ink', h: 'red-ink', d: 'blue-ink', c: 'green-ink' };
+const SUIT_GLYPH = { s: '♠', h: '♥', d: '♦', c: '♣' };
+const RANK = { 2:'2',3:'3',4:'4',5:'5',6:'6',7:'7',8:'8',9:'9',10:'10',11:'J',12:'Q',13:'K',14:'A' };
+const COURT = {
+  13: ['.#.#.##.#.#.','.##########.','..########..','..+######+..','..+.+..+.+..','..+......+..','..++.##.++..','...+....+...','...+.##.+...','....++++....','..##.++.##..','.###.##.###.','####.##.####','####.##.####'],
+  11: ['...######...','..########..','.##########.','..+######+..','..+.+..+.+..','..+......+..','..+..##..+..','...+....+...','....++++....','.....++.....','..###..###..','.####..####.','#####..#####','#####..#####'],
+  12: ['..#.#..#.#..','..########..','.##..##..##.','.#+######+#.','.#+.+..+.+#.','.#+......+#.','.#++.##.++#.','.#.+....+.#.','.#..++++..#.','.#...++...#.','..##.##.##..','.###.##.###.','####.##.####','####.##.####'],
+};
+function cardShape(x, y, w, h, paper, drop) {
+  if (drop) rect(x + 1, y + h, w - 1, drop, K.room);
+  rect(x + 1, y, w - 2, h, paper); rect(x, y + 1, w, h - 2, paper);
+  rect(x + w - 1, y + 1, 1, h - 2, K['paper-shade']); rect(x + 1, y + h - 1, w - 2, 1, K['paper-shade']);
+}
+function card(x, y, size, c, lit, drop) {
+  const M = size === 'M'; const w = M ? 22 : 14, h = M ? 30 : 19;
+  cardShape(x, y, w, h, lit || K.paper, drop);
+  const ink = K[SUIT_INK[c.s]];
+  text(RANK[c.r], x + 2, y - 1, 1, ink);
+  if (M) {
+    if (COURT[c.r]) { bitmap(COURT[c.r], x + 8, y + 13, { '#': ink, '+': K['paper-shade'] }); bitmap(PIP[c.s], x + 2, y + 12, { '#': ink }); }
+    else bitmap(PIP[c.s], x + 7, y + 14, { '#': ink }, 2);
+  } else bitmap(PIP[c.s], x + 4, y + 10, { '#': ink });
+}
+function cardBack(x, y, size, drop) {
+  const M = size === 'M'; const w = M ? 22 : 14, h = M ? 30 : 19;
+  cardShape(x, y, w, h, K.paper, drop);
+  for (let j = 2; j < h - 2; j++) for (let i = 2; i < w - 2; i++) {
+    if ((i + j) % 4 === 0 || (i - j + 400) % 4 === 0) px(x + i, y + j, K['back-ink']);
+  }
+  const cx = x + Math.floor(w / 2), cy = y + Math.floor(h / 2);
+  for (let j = -2; j <= 2; j++) for (let i = -2; i <= 2; i++) if (Math.abs(i) + Math.abs(j) <= 2) px(cx + i, cy + j, Math.abs(i) + Math.abs(j) === 2 ? K['back-ink'] : K.paper);
+}
+// a card turned by hand: scaleX table, back for the first half, face for the second
+function flipScale(n) {
+  const T = [1, 0.66, 0.33, 0, 0, 0.33, 0.66, 1];
+  if (n < 0) return { s: 1, face: false }; if (n >= 8) return { s: 1, face: true };
+  return { s: T[n], face: n >= 4 };
+}
+function cardTurning(x, y, size, c, lit, drop, n) {
+  const fl = flipScale(n); const M = size === 'M'; const w = M ? 22 : 14, h = M ? 30 : 19;
+  if (fl.s >= 1) { if (fl.face) card(x, y, size, c, lit, drop); else cardBack(x, y, size, drop); return; }
+  if (fl.s <= 0.01) return;
+  const oc = offscreen(x, y, w, h + 2, () => { if (fl.face) card(x, y, size, c, lit, drop); else cardBack(x, y, size, drop); });
+  const dw = Math.max(1, Math.round(w * fl.s));
+  blit(oc, x + Math.round((w - dw) / 2), y, dw);
+}
+
+// clay chip tower: n chips, base at (x, yBase). 12 wide, 2u per chip.
+function tower(x, yBase, n) {
+  if (n <= 0) return;
+  const top = yBase - n * 2;
+  for (let i = 0; i < n; i++) {
+    const y = yBase - (i + 1) * 2;
+    rect(x, y, 12, 2, K['clay-red']);
+    rect(x, y + 1, 12, 1, K['clay-edge']);
+    [1, 5, 9].forEach((sx) => rect(x + sx + (i % 2), y, 2, 1, K['clay-bone']));
+  }
+  rect(x + 2, top - 3, 8, 1, K['clay-red']); rect(x + 1, top - 2, 10, 2, K['clay-red']);
+  rect(x + 3, top - 2, 6, 1, K['clay-bone']);
+  rect(x, yBase, 12, 1, K.room);
+}
+function chip(x, y) { // a single chip seen in flight: top face 12x4 + edge
+  rect(x + 2, y, 8, 1, K['clay-red']); rect(x + 1, y + 1, 10, 2, K['clay-red']); rect(x + 3, y + 1, 6, 1, K['clay-bone']);
+  rect(x, y + 3, 12, 2, K['clay-red']); rect(x, y + 4, 12, 1, K['clay-edge']);
+}
+
+// avatars 12x12: 'h' hair/hat, 'f' skin, 'F' skin shade, 'c' collar, 'e' eye
+const AV = {
+  pete: ['...hhhhh....','..hhhhhhh...','..hfffffhh..','..ffffffF...','..fefffeF...','..ffffffF...','...ffffF....','...fFFFF....','..cccccccc..','.cccccccccc.','ccccccccccc.','cccccccccccc'],
+  carl: ['............','...hhhhhh...','..hhhhhhhh..','.hhhhhhhhhh.','..ffffffF...','..fefffeF...','..ffffffF...','...fffFF....','..ccFFcccc..','.cccccccccc.','ccccccccccc.','cccccccccccc'],
+  betty:['..hhhhhhh...','.hhhhhhhhh..','.hhfffffhhh.','.hffffffFhh.','.hfeffefFhh.','.hffffffFhh.','.hhffffFhh..','.hh.FFF.hh..','..cccccccc..','.cccccccccc.','ccccccccccc.','cccccccccccc'],
+  sam:  ['...hhhhhhh..','..hhhhhhhhh.','.hhffffffhhh','..ffffffF.hh','..fefffeF.hh','..ffffffF..h','..ffffffF...','...fFFFF....','..cccccccc..','.cccccccccc.','ccccccccccc.','cccccccccccc'],
+  nina: ['...hhhhhh...','..hhhhhhhh..','.hhffffffh..','.hffffffFh..','.hfeffefFh..','.hfffffFFh..','..hffffFh...','..h.FFF.h...','..cccccccc..','.cccccccccc.','ccccccccccc.','cccccccccccc'],
+};
+const BACKFRAME = ['............','...hhhhhh...','..hhhhhhhh..','.hhhhhhhhhh.','.hhhhhhhhhh.','.hhhhhhhhhh.','..hhhhhhhh..','...hhhhhh...','..cccccccc..','.cccccccccc.','ccccccccccc.','cccccccccccc'];
+function avatar(id, x, y, hair, collar, back, unlit) {
+  const map = unlit ? { h: hair, f: hair, F: hair, c: collar, e: hair } : { h: hair, f: K.skin, F: K['skin-shade'], c: collar, e: K.ink };
+  bitmap(back ? BACKFRAME : AV[id], x, y, map);
+}
+
+// ---------- the room: felt ellipse, rail, light pool. Painted per light state and cached.
+const TABLE = { cx: 168, cy: 128, rx: 148, ry: 88, rail: 8, wear: { x: 158, y: 104 } };
+const POOL = { cx: 201, cy: 162, aspect: 1.3, r1: 58, r2: 100 };
+function band(d, r1, r2, x, y) {
+  const tw = ((x + y) & 3);
+  const step = (r) => { if (d < r - 3) return 0; if (d >= r + 3) return 1; return d < r ? (tw === 0 ? 1 : 0) : (tw === 0 ? 0 : 1); };
+  return step(r1) + step(r2);
+}
+// lvl: 3 full, 2 brownout (one band down), 0 off. warm: units added to both pool radii (the filament runs hot)
+function paintRoom(lightOn, lvl, warm) {
+  if (lvl === undefined) lvl = 3; warm = warm || 0;
+  const img = ctx.createImageData(R.W, R.H); const d = img.data;
+  const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+  const FELT = [K['felt-hot'], K.felt, K['felt-rim'], K['felt-rim']].map(hex);
+  const DARKFELT = hex('#0f1a14');
+  const RAIL = [K['rail-hi'], K.rail, K.rail].map(hex);
+  const RAILDARK = hex(K['rail-dark']);
+  const ROOM = hex(K.room), ROOM2 = hex(K['room-2']);
+  const r1 = POOL.r1 + warm, r2 = POOL.r2 + warm;
+  for (let Y = 0; Y < R.H; Y++) for (let X = 0; X < R.W; X++) {
+    const x = X - R.ox, y = Y - R.oy;
+    const ex = (x - TABLE.cx) / TABLE.rx, ey = (y - TABLE.cy) / TABLE.ry;
+    const e = Math.sqrt(ex * ex + ey * ey);
+    const rex = (x - TABLE.cx) / (TABLE.rx + TABLE.rail), rey = (y - TABLE.cy) / (TABLE.ry + TABLE.rail);
+    const re = Math.sqrt(rex * rex + rey * rey);
+    const pd = Math.sqrt(((x - POOL.cx) / POOL.aspect) ** 2 + (y - POOL.cy) ** 2);
+    let b = band(pd, r1, r2, x, y);
+    if (!lightOn) b = 3; else b = Math.min(3, b + (3 - lvl));
+    let c;
+    if (e <= 1) c = b >= 3 ? DARKFELT : FELT[b];
+    else if (re <= 1) {
+      const edge = (e - 1) * TABLE.rx;
+      if (edge < 1.2) c = ROOM; else c = !lightOn || b >= 3 ? RAILDARK : RAIL[Math.min(2, b)];
+      if (re > 0.985 && y < TABLE.cy && lightOn && b < 3) c = RAIL[0];
+    } else {
+      const out = (re - 1) * (TABLE.rx + TABLE.rail);
+      const tw = (x + y) & 3;
+      c = !lightOn ? ROOM : out < 4 ? ROOM2 : out < 8 ? (tw === 0 ? ROOM : ROOM2) : out < 12 ? (tw === 0 ? ROOM2 : ROOM) : ROOM;
+    }
+    const i = (Y * R.W + X) * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255;
+  }
+  if (lightOn && TABLE.wear) { // the dealer's push zone: one step lighter, twill-dithered edge
+    const wx = TABLE.wear.x, wy = TABLE.wear.y; const c = hex(K.felt);
+    for (let j = 0; j < 8; j++) for (let i = 0; i < 20; i++) {
+      const ex = (i - 9.5) / 10, ey = (j - 3.5) / 4; const r = ex * ex + ey * ey;
+      if (r < 0.45 || (r < 1 && ((wx + i + wy + j) & 3) === 0)) {
+        const k = ((R.oy + wy + j) * R.W + R.ox + wx + i) * 4;
+        d[k] = c[0] + 6; d[k + 1] = c[1] + 9; d[k + 2] = c[2] + 6;
+      }
+    }
+  }
+  return img;
+}
+const roomCache = {};
+function room(on, lvl, warm) { const k = on + ':' + lvl + ':' + (warm || 0); return roomCache[k] || (roomCache[k] = paintRoom(on, lvl, warm)); }
+function clearRooms() { for (const k in roomCache) delete roomCache[k]; }
+function poolTone(x, y) {
+  const pd = Math.sqrt(((x - POOL.cx) / POOL.aspect) ** 2 + (y - POOL.cy) ** 2);
+  return pd < POOL.r1 ? K.paper : K['paper-2'];
+}
+
+// ---------- the slip (DESIGN.md section 5)
+const SLIP = { x: 184, y: 108, w: 36, h: 108, base: 104 };
+function slipY(p) { return SLIP.y + SLIP.base - p; }
+function slip(o) {
+  const { x, y, w, h } = SLIP;
+  const scaleX = o.scaleX === undefined ? 1 : o.scaleX;
+  if (scaleX <= 0.01) return;
+  const oc = offscreen(x, y, w, h + 2, () => slipFace(o));
+  const dw = Math.max(1, Math.round(w * scaleX));
+  blit(oc, x + Math.round((w - dw) / 2), y, dw);
+}
+function slipFace(o) {
+  const { x, y, w, h } = SLIP;
+  const NEED = o.need, HAVE = o.have, READ = o.read;
+  const face = !!o.face; const pour = o.pour === undefined ? HAVE : o.pour;
+  rect(x + 1, y + h, w - 1, 2, K.room);
+  rect(x + 1, y, w - 2, h, K.paper); rect(x, y + 1, w, h - 2, K.paper);
+  rect(x + w - 1, y + 1, 1, h - 2, K['paper-shade']); rect(x + 1, y + h - 1, w - 2, 1, K['paper-shade']);
+  for (let i = 1; i < w - 1; i += 3) rect(x + i, y + 2, 1, 1, K['paper-shade']); // torn off a pad
+  if (face && pour > 0) rect(x + 1, slipY(pour), w - 2, pour, K.ink);
+  if (face && o.showLoss && HAVE < NEED) {
+    for (let p = HAVE + 1; p < NEED - 1; p++) for (let i = 1; i < w - 1; i++) if (((i + p) % 3) === 0) rect(x + i, slipY(p), 1, 1, K.loss);
+  }
+  for (let p = 0; p <= 100; p += 5) {
+    const inInk = face && p <= pour;
+    rect(x + 1, slipY(p), p % 10 === 0 ? 5 : 3, 1, inInk ? K['paper-shade'] : K.ink);
+  }
+  if (NEED !== null && NEED !== undefined) {
+    const ry = slipY(NEED);
+    const c = face && NEED <= pour ? K['paper-shade'] : K['price-ink'];
+    if (o.hollow) { rect(x + 6, ry - 1, w - 6, 1, c); rect(x + 6, ry + 1, w - 6, 1, c); }
+    else rect(x + 6, ry - 1, w - 6, 2, c);
+  }
+  if (face && o.showHave) {
+    const inside = pour >= 24;
+    const ty = inside ? slipY(pour) + 2 : slipY(Math.max(pour, (NEED || 0) + 2)) - 24; // short pours print above the price rule, never across it
+    if (!inside) rect(x + 6, ty + 2, 28, 20, K.paper);
+    text(String(HAVE), x + 7, ty - 3 + (inside ? 4 : 0), 2, inside ? K.paper : K.ink);
+  }
+  if (o.pencil !== null && o.pencil !== undefined) rect(x + 6, slipY(o.pencil), w - 8, 1, K['text-dim']);
+  if (READ !== null && READ !== undefined) { // the read: a V cut through the paper
+    const ny = slipY(READ); const t = drawTarget || ctx;
+    [[-3, 1], [-2, 3], [-1, 5], [0, 6], [1, 5], [2, 3], [3, 1]].forEach(([dy, len]) => t.clearRect(R.ox + x, R.oy + ny + dy, len, 1));
+  }
+}
+// the price, lit on the felt: a 3u tab of the rule past the slip's edge, the number at 2x in bulb amber
+function priceTab(need) {
+  const ry = slipY(need); const x = SLIP.x + SLIP.w;
+  rect(x, ry - 1, 3, 2, K.bulb);
+  rect(x, ry + 1, 3, 1, K.room);
+  text(String(need), x + 5, ry - 21, 2, K.bulb);
+  text('%', x + 5 + 28, ry - 9, 1, K.bulb);
+}
+
+// ---------- rail buttons (leather, 1u stitch row). pressed = value inversion, never a hue
+function railButton(x, y, w, h, pressed) {
+  rect(x, y + h, w, 1, K.room);
+  rect(x, y, w, h, pressed ? K.text : K.rail);
+  rect(x, y, w, 1, pressed ? K.text : K['rail-hi']);
+  const st = pressed ? K['text-dim'] : K['rail-hi'];
+  for (let i = x + 3; i < x + w - 3; i += 3) { rect(i, y + 2, 1, 1, st); rect(i, y + h - 3, 1, 1, st); }
+}
+
+function ease(n, N, kind) {
+  const t = Math.max(0, Math.min(1, n / N));
+  if (kind === 'SLIDE') return 1 - (1 - t) * (1 - t);
+  if (kind === 'SWEEP') return t * t;
+  return t;
+}
+function toUnits(ev) { const r = cv.getBoundingClientRect(); return { x: Math.floor((ev.clientX - r.left) * (cv.width / r.width)) - R.ox, y: Math.floor((ev.clientY - r.top) * (cv.height / r.height)) - R.oy }; }
+function inBox(p, b) { return p.x >= b.x && p.x < b.x + b.w && p.y >= b.y && p.y < b.y + b.h; }
+
+/* TABLE, direction A: hand 14, the turn. neon nina bets 120 into 150; the hero (9h 8h, flush draw + open-ender)
+   faces it. Loop: turn dealt -> nina's chips slide in -> slip + rule + lit price in one frame -> read nicked
+   -> slip flips -> ink pours to 34, past the rule -> coach says call -> call -> river 10h -> showdown -> pot tossed
+   to the hero under a warm bulb. Click the slip (or type two digits) to make your own read; hover holds the hand. */
+const H = (r, s) => ({ r, s });
+const S = {
+  hand: 14, blinds: '10/20',
+  board: [H(13, 'h'), H(7, 'h'), H(6, 'c'), H(2, 's'), H(10, 'h')],
+  hero: [H(9, 'h'), H(8, 'h')], heroStack: 1240,
+  nina: [H(13, 's'), H(12, 'd')],
+  toCall: 120, potBefore: 150, NEED: 31, HAVE: 34, demoRead: 25,
+  reasons: [
+    'You have High Card, King high.',
+    'Pot odds: call $120 to win $270 → you need 31% equity; you have ~34%. Calling is profitable long-term.',
+    'You have 15 outs (Flush draw + Open-ended straight draw). Rule of 2: 15×2 ≈ 30% to hit on the river.',
+    'Strong draw and the price is right. Call, and let the river decide.',
+  ],
+  verdict: 'call',
+};
+const SEATS = [
+  { id: 'sam', name: 'scanline samantha', stack: 3415, x: 24, y: 2, hair: '#3a3f46', collar: '#4a4a2a', folded: true },
+  { id: 'betty', name: '8-bit betty', stack: 1120, x: 220, y: 2, hair: '#a8642c', collar: '#5a3a2a', folded: true },
+  { id: 'carl', name: 'crt carl', stack: 2015, x: 0, y: 62, hair: '#2c2420', collar: '#2f4a5a', folded: true },
+  { id: 'pete', name: 'pixel pete', stack: 1860, x: 0, y: 136, hair: '#6b4a2a', collar: '#3a2a4a', folded: true },
+  { id: 'nina', name: 'neon nina', stack: 4460, x: 236, y: 62, hair: '#1c1a22', collar: '#6a2a2a', folded: false },
+];
+const NINA = SEATS[4];
+const BOARD_X = [105, 131, 157, 183, 209], BOARD_Y = 72;
+const DEALER = { x: 86, y: 64 };
+const NINA_TOWER = { x: 250, base: 122 }, HERO_TOWER = { x: 104, base: 192 };
+const POT_TOWERS = [160, 174, 188], POT_BASE = 69, CHIP = 20, POT_CHIP = 30;
+const WIN_TOWERS = [{ x: 130, base: 168 }, { x: 144, base: 169 }, { x: 158, base: 168 }];
+const TOSS_CHIPS = [5, 5, 3], TOSS_VAL = [150, 150, 90];
+
+// timeline, frames @60fps (DESIGN.md sections 7-8)
+const F = {
+  turnDeal: 0, turnFlip: 15, ninaAct: 22, betStart: 40, stagger: 3, chipN: 12, decide: 92,
+  commit: 170, flip: 172, pour: 181, call: 262, heroChips: 266, gather: 300, gatherN: 7,
+  riverDeal: 322, riverFlip: 336, brown: 336, brownN: 18, ninaCheck: 356, heroCheck: 362,
+  show: 370, lift: 384, name: 386, toss: 390, tossN: 24, tossStagger: 6, warmN: 48, end: 560,
+};
+const ninaLast = F.betStart + 5 * F.stagger + F.chipN;    // 67
+const heroLast = F.heroChips + 5 * F.stagger + F.chipN;   // 293
+const pourDone = F.pour + Math.ceil(S.HAVE / 2);          // 198
+const verdictAt = pourDone + 2;
+const TOSS_N = 3;
+
+const params = new URLSearchParams(location.search);
+let frozen = null; let frame = 0;
+const STATES = { before: 150, after: 240, win: 432, end: 470 };
+if (params.get('state') && STATES[params.get('state')] !== undefined) { frozen = params.get('state'); frame = STATES[frozen]; }
+if (params.get('frame')) { frozen = 'frame'; frame = Number(params.get('frame')) || 0; }
+if (REDUCED && !frozen) { frozen = 'before'; frame = STATES.before; }
+let read = null, userRead = false, digitBuf = '', hover = null, pressed = null, pressedUntil = -1, preset = null, folded = false;
+const presetParam = params.get('hover');
+if (presetParam) hover = Number(presetParam);
+
+function deciding(f) { return f >= F.decide && f < F.commit; }
+function readAt(f) { return f >= F.commit ? (userRead ? read : S.demoRead) : (userRead ? read : null); }
+
+// ---------- the coach's slate: hung on the wall, out of the light. Painted once.
+const SL = { x: 337, y: 0, w: 143, h: 244 };
+let slateImg = null;
+function paintSlate() {
+  return offscreen(SL.x, SL.y, SL.w, 256, () => {
+    const { x, y, w, h } = SL; const FR = 4;
+    rect(x, y, w, h, K['rail-dark']);
+    // frame grain runs along each bar; the left bar faces the bulb and catches one step of it
+    for (let i = 0; i < w; i++) { if (hash(i, 7) < 0.4) rect(x + i, y + 1, 1, 1, K.rail); if (hash(i, 8) < 0.25) rect(x + i, y + 2, 1, 1, K.rail); }
+    for (let j = 0; j < h; j++) {
+      rect(x, y + j, 1, 1, K.rail); if (hash(3, j) < 0.45) rect(x + 1, y + j, 1, 1, K['rail-hi']); if (hash(4, j) < 0.3) rect(x + 2, y + j, 1, 1, K.rail);
+      if (hash(9, j) < 0.3) rect(x + w - 2, y + j, 1, 1, K.rail);
+    }
+    const sx = x + FR, sy = y + FR, sw = w - FR - 3, sh = h - FR;
+    rect(sx, sy, sw, sh, K.coach);
+    // eraser swipes from earlier hands: curved strokes (the arm pivots at the elbow), twill-dithered edges
+    const swipes = [
+      { cx: sx + 62, cy: 150, r: 104, hw: 9, a0: -2.75, a1: -0.45 },
+      { cx: sx + 76, cy: 262, r: 86, hw: 10, a0: -2.6, a1: -0.6 },
+      { cx: sx - 6, cy: 128, r: 74, hw: 7, a0: -0.9, a1: 0.7 },
+    ];
+    for (let j = sy; j < sy + sh; j++) for (let i = sx; i < sx + sw; i++) {
+      let inS = false;
+      for (const sw2 of swipes) {
+        const dx = i - sw2.cx, dy = j - sw2.cy; const a = Math.atan2(dy, dx);
+        if (a < sw2.a0 || a > sw2.a1) continue;
+        const taper = Math.min(1, (a - sw2.a0) * 4, (sw2.a1 - a) * 4);
+        const dd = Math.abs(Math.sqrt(dx * dx + dy * dy) - sw2.r) / (sw2.hw * taper);
+        if (dd < 0.75 || (dd < 1 && ((i + j) & 3) === 0)) { inS = true; break; }
+      }
+      if (inS) px(i, j, K['coach-smear']);
+      // chalk dust: sparse everywhere, settling thick along the bottom edge above the ledge
+      const settle = j > sy + sh - 6 ? (j - (sy + sh - 6)) / 6 : 0;
+      const dz = hash(i, j);
+      if (dz < 0.5 * settle * settle) px(i, j, settle > 0.66 && dz < 0.12 ? K['coach-dim'] : K['coach-ghost']);
+      else if (dz < (inS ? 0.03 : 0.008)) px(i, j, K['coach-ghost']);
+    }
+    // the last hand, half rubbed out
+    text('fold', sx + 64, 106, 2, K['coach-ghost'], null, 0.45);
+    text('26 < 33', sx + 68, 128, 1, K['coach-ghost'], null, 0.3);
+    rect(sx, sy, sw, 1, K.room); rect(sx, sy, 1, sh, K.room);
+    // the chalk ledge: lit top face, front, drop
+    rect(x - 3, h, w + 3, 2, K.rail); rect(x - 3, h, w + 3, 1, K['rail-hi']);
+    rect(x - 3, h + 2, w + 3, 5, K['rail-dark']); rect(x - 2, h + 7, w + 2, 1, K.room);
+    for (let i = 0; i < w + 3; i++) if (hash(i, 99) < 0.3) rect(x - 3 + i, h + 4, 1, 1, K.rail);
+    // a felt eraser and a stub of chalk resting on the ledge
+    const ex = x + 94;
+    rect(ex, h - 7, 30, 5, K.rail); rect(ex, h - 7, 30, 1, K['rail-hi']); rect(ex + 29, h - 6, 1, 4, K['rail-dark']);
+    rect(ex, h - 2, 30, 2, K['coach-dim']); for (let i = 0; i < 30; i++) if (hash(i, 5) < 0.4) rect(ex + i, h - 2, 1, 1, K['coach-text']);
+    rect(x + 128, h - 3, 9, 3, K['paper-shade']); rect(x + 136, h - 3, 1, 3, K.paper); rect(x + 128, h - 1, 9, 1, K['text-dim']);
+  });
+}
+
+// ---------- coach
+const CX = 343;
+function coachText(s, y, color, k) { return text(s, CX, y, k || 1, color || K['coach-text']); }
+function logColor(l) { return /^(preflop|flop|turn|river)/.test(l) || l.startsWith('·') ? K['coach-dim'] : K['coach-text']; }
+const LOG_A = ['preflop', 'nina raises 60', 'you call 60', 'blinds fold', '', 'flop K♥ 7♥ 6♣', 'nina checks', 'you check', '', 'turn 2♠'];
+function logB(f, r) {
+  const L = [['turn 2♠', 0], ['nina bets 120', 0], ['you call 120', F.call]];
+  L.push([r === null ? '· no read' : '· read ' + r + ', off ' + Math.abs(S.HAVE - r), F.call]);
+  L.push(['', F.riverDeal], ['river 10♥', F.riverFlip + 4], ['nina checks', F.ninaCheck], ['you check', F.heroCheck], ['', F.show],
+    ['nina: K♠ Q♦', F.show], ['· pair of kings', F.show + 7], ['you: 9♥ 8♥', F.lift], ['· flush, king high', F.lift], ['you win 390', F.toss + 8]);
+  return L.filter(([, at]) => f >= at).map(([l]) => l);
+}
+function drawCoach(f) {
+  blit(slateImg, SL.x, SL.y);
+  coachText('hand ' + S.hand + ' · ' + S.blinds, 6, K['coach-dim']);
+  const r = readAt(f);
+  if (folded) { coachText('you fold', 22); return; }
+  if (f < F.decide || f >= F.call + 6) {
+    rect(CX, 21, 131, 1, K['coach-edge']);
+    const lines = f < F.decide ? LOG_A.concat(f >= ninaLast ? ['nina bets 120'] : []) : logB(f, r);
+    lines.slice(-14).forEach((l, i) => coachText(l, 25 + i * 14, logColor(l)));
+    return;
+  }
+  coachText('call 120 · pot 270', 22);
+  if (f < F.commit) {
+    const typed = digitBuf ? digitBuf + '_' : '';
+    coachText('your read?' + (typed ? ' ' + typed : ''), 36, typed ? K['coach-text'] : K['coach-dim']);
+    rect(CX, 56, 131, 1, K['coach-edge']);
+    LOG_A.concat(['nina bets 120']).forEach((l, i) => coachText(l, 62 + i * 14, logColor(l)));
+    return;
+  }
+  if (r === null) coachText('no read', 36, K['coach-dim']);
+  else { const off = Math.abs(S.HAVE - r); coachText('you ' + r + ' · off ' + off, 36, off <= 5 ? K['coach-dim'] : K['coach-text']); }
+  const vf = f - verdictAt; if (vf < 0) return;
+  ctx.globalAlpha = Math.min(1, (vf + 1) / 3);   // opacity in 3 steps, never moves
+  text(S.verdict, CX, 54, 2, K['coach-text'], null, 0.12);
+  // the teacher's underline: two strokes, one unit apart where the chalk lifted
+  const uw = S.verdict.length * 14;
+  rect(CX, 79, Math.round(uw * 0.55), 1, K['coach-dim']); rect(CX + Math.round(uw * 0.55) + 1, 80, uw - Math.round(uw * 0.55) + 3, 1, K['coach-dim']);
+  let y = 90, used = 0, shown = 0; const LINES = 9;
+  for (const rs of S.reasons) {
+    const ls = wrap(rs, 19);
+    if (used + ls.length > LINES) break;
+    ls.forEach((l) => { coachText(l, y); y += 14; });
+    y += 7; used += ls.length; shown++;
+  }
+  const rest = S.reasons.length - shown;
+  if (rest > 0) coachText(rest + ' more · tab', 224, K['coach-dim']);
+  ctx.globalAlpha = 1;
+}
+
+// ---------- action bar
+let BTNS = [];
+function drawActionBar(f) {
+  BTNS = [];
+  if (f >= F.name && !folded) { // showdown: the bar gives its row to the hand
+    const n = f - F.name;
+    if (n >= 0) {
+      text('flush', 20, 251, 4, K.text);
+      if (f >= F.toss + 8) { text('you win', 178, 267, 1, K['text-dim']); text('390', 234, 256, 2, K.text); }
+      text('king high · 9♥ 8♥', 178, 284, 1, K['text-dim']);
+    }
+    return;
+  }
+  const live = deciding(f) || (f >= F.commit && f < F.call + 6);
+  const Y = 260; let x = 22;
+  const isP = (id) => pressed === id && f <= pressedUntil;
+  const btn = (id, w, h, yy) => { const p = isP(id); railButton(x, yy, w, h, p); BTNS.push({ id, x, y: yy, w, h }); return p; };
+  const ink = (p, c) => (p ? K.ink : live ? c : K['text-dim']);
+  let p = btn('fold', 56, 32, Y); text('f', x + 8, Y + 9, 1, p ? K.ink : K['text-dim']); text('fold', x + 19, Y + 9, 1, ink(p, K.text)); x += 62;
+  p = btn('call', 139, 32, Y); text('c', x + 8, Y + 9, 1, p ? K.ink : K['text-dim']);
+  text('call', x + 19, Y + 3, 2, ink(p, K.text)); text('120', x + 19 + 70, Y + 3, 2, ink(p, K.bulb)); x += 145;
+  p = btn('raise', 97, 32, Y); text('r', x + 8, Y + 9, 1, p ? K.ink : K['text-dim']); text('raise', x + 19, Y + 3, 2, ink(p, K.text)); x += 107;
+  ['½', '¾', 'pot', 'max'].forEach((lab, i) => {
+    const w = lab.length * 7 + 12; const id = 'preset' + i; const sel = preset === i;
+    railButton(x, Y + 6, w, 20, sel || isP(id)); BTNS.push({ id, x, y: Y + 6, w, h: 20 });
+    text(lab, x + 6, Y + 9, 1, sel || isP(id) ? K.ink : live ? K.text : K['text-dim']); x += w + 6;
+  });
+}
+
+// ---------- seats
+function drawSeat(st, f) {
+  const dim = st.folded; const tc = dim ? K['text-dim'] : K.text;
+  const acting = st === NINA && f >= F.ninaAct && f < F.betStart;
+  avatar(st.id, st.x + (acting ? 2 : 0), st.y + 1 + (acting ? 1 : 0), st.hair, st.collar, st.folded);
+  text(st.name, st.x + 16, st.y - 1, 1, tc);
+  let stack = st.stack;
+  if (st === NINA) stack -= CHIP * Math.max(0, Math.min(6, Math.floor((f - F.betStart) / F.stagger) + 1));
+  text(fmt(stack), st.x + 16, st.y + 13, 1, tc);
+  if (acting) { const left = 1 - (f - F.ninaAct) / (F.betStart - F.ninaAct); rect(st.x + 16, st.y + 12, Math.max(1, Math.round(56 * left)), 1, K['text-dim']); }
+  if (!st.folded) {
+    if (st === NINA && f >= F.show) {
+      cardTurning(st.x + 56, st.y + 14, 'S', S.nina[0], K['paper-2'], 1, f - F.show);
+      cardTurning(st.x + 72, st.y + 14, 'S', S.nina[1], K['paper-2'], 1, f - F.show - 7);
+    } else { cardBack(st.x + 56, st.y + 14, 'S', 1); cardBack(st.x + 64, st.y + 15, 'S', 1); }
+  }
+}
+
+function landedChips(f, start) { return Math.max(0, Math.min(6, Math.floor((f - start - F.chipN) / F.stagger) + 1)); }
+function potTowers(n, f) {
+  const per = [0, 0, 0]; for (let i = 0; i < n; i++) per[Math.min(2, Math.floor(i / 5))]++;
+  POT_TOWERS.forEach((x, i) => tower(x, POT_BASE, per[i]));
+}
+function warmOffset(f) {
+  const n = f - F.toss; if (n < 0 || n >= F.warmN) return 0;
+  const steps = [4, 8, 12]; if (n < 9) return steps[Math.floor(n / 3)]; if (n >= F.warmN - 9) return steps[2 - Math.floor((n - (F.warmN - 9)) / 3)]; return 12;
+}
+
+function render() {
+  const f = frame;
+  const brown = f >= F.brown && f < F.brown + F.brownN;
+  ctx.putImageData(room(true, brown ? 2 : 3, warmOffset(f)), 0, 0);
+
+  // ----- chips and the pot
+  const ninaIn = landedChips(f, F.betStart), heroIn = f >= F.heroChips && !folded ? landedChips(f, F.heroChips) : 0;
+  const gathered = f >= F.gather + F.gatherN && !folded;
+  const tossLaunched = f >= F.toss ? Math.min(TOSS_N, Math.floor((f - F.toss) / F.tossStagger) + 1) : 0;
+  const tossLanded = f >= F.toss ? Math.max(0, Math.min(TOSS_N, Math.floor((f - F.toss - F.tossN) / F.tossStagger) + 1)) : 0;
+  const sumTo = (n) => TOSS_VAL.slice(0, n).reduce((a, b) => a + b, 0);
+  let pot = S.potBefore + CHIP * (ninaIn + heroIn) - sumTo(tossLaunched);
+  if (gathered) POT_TOWERS.forEach((x, i) => { if (i >= tossLaunched) tower(x, POT_BASE, TOSS_CHIPS[i]); }); else tower(POT_TOWERS[0], POT_BASE, 5);
+  if (pot > 0) text('pot ' + fmt(pot), 105, 55, 1, K.text);
+
+  // ----- board
+  for (let i = 0; i < 3; i++) {
+    const lift = f >= F.lift && (i === 0 || i === 1) && !folded ? 2 : 0;
+    card(BOARD_X[i], BOARD_Y - lift, 'M', S.board[i], poolTone(BOARD_X[i] + 11, BOARD_Y + 15), 1);
+  }
+  const slot = (x) => { rect(x, BOARD_Y, 22, 1, K['felt-rim']); rect(x, BOARD_Y + 29, 22, 1, K['felt-rim']); rect(x, BOARD_Y, 1, 30, K['felt-rim']); rect(x + 21, BOARD_Y, 1, 30, K['felt-rim']); };
+  const dealt = (idx, dealAt, flipAt, lift) => {
+    const t = ease(f - dealAt, 9, 'SLIDE');
+    const tx = Math.round(DEALER.x + (BOARD_X[idx] - DEALER.x) * t), ty = Math.round(DEALER.y + (BOARD_Y - DEALER.y) * t) - lift;
+    cardTurning(tx, ty, 'M', S.board[idx], poolTone(BOARD_X[idx] + 11, BOARD_Y + 15), 1, f - flipAt);
+  };
+  if (f < F.riverDeal || folded) slot(BOARD_X[4]);
+  dealt(3, F.turnDeal, F.turnFlip, 0);
+  if (f >= F.riverDeal && !folded) { const ln = f - (F.riverFlip + 8); dealt(4, F.riverDeal, F.riverFlip, f >= F.lift ? 2 : (ln >= 0 && ln < 3 ? [0, 1, 0][ln] : 0)); }
+
+  // dealer button
+  rect(DEALER.x - 4, DEALER.y + 2, 10, 8, K['clay-bone']); rect(DEALER.x - 3, DEALER.y + 1, 8, 10, K['clay-bone']);
+  rect(DEALER.x - 3, DEALER.y + 11, 8, 1, K.room); text('d', DEALER.x + 1, DEALER.y - 1, 1, K.ink, 'center');
+
+  SEATS.forEach((s) => drawSeat(s, f));
+
+  // nina's bet: chips slide in one by one, the tower grows per landing, T2 knock after the last
+  const gT = f >= F.gather ? ease(f - F.gather, F.gatherN, 'SWEEP') : 0;
+  if (f >= F.betStart && !gathered) {
+    const knock = [0, 2, 1, 0][f - ninaLast] || 0;
+    const gx = Math.round(NINA_TOWER.x + (POT_TOWERS[2] - NINA_TOWER.x) * gT), gy = Math.round(NINA_TOWER.base + (POT_BASE - NINA_TOWER.base) * gT);
+    tower(gx, gy + knock, ninaIn);
+    for (let i = ninaIn; i < 6; i++) {
+      const n = f - (F.betStart + i * F.stagger); if (n < 0) continue;
+      const sy = Math.round(84 + (NINA_TOWER.base - 2 * (i + 1) - 84) * ease(n, F.chipN, 'SLIDE'));
+      tower(NINA_TOWER.x, sy + 2, 1);
+    }
+    if (f >= ninaLast && f < F.gather) text('bet 120', NINA_TOWER.x + 16, NINA_TOWER.base - 14, 1, K.text);
+  }
+  // the hero's call: six chips from the stack to the tower left of the cards
+  if (f >= F.heroChips && !gathered && !folded) {
+    const gx = Math.round(HERO_TOWER.x + (POT_TOWERS[1] - HERO_TOWER.x) * gT), gy = Math.round(HERO_TOWER.base + (POT_BASE - HERO_TOWER.base) * gT);
+    tower(gx, gy, heroIn);
+    for (let i = heroIn; i < 6; i++) {
+      const n = f - (F.heroChips + i * F.stagger); if (n < 0) continue;
+      const t = ease(n, F.chipN, 'SLIDE');
+      tower(Math.round(140 + (HERO_TOWER.x - 140) * t), Math.round(232 + (HERO_TOWER.base - 2 * i - 232) * t), 1);
+    }
+  }
+  // pot award: TOSS, x linear, y on a 12u parabola, no overshoot; each landing adds to the stack
+  if (f >= F.toss && !folded) {
+    for (let i = 0; i < tossLaunched; i++) {
+      const n = f - (F.toss + i * F.tossStagger); const t = Math.max(0, Math.min(1, n / F.tossN)); const w = WIN_TOWERS[i];
+      if (t >= 1) { const kn = [0, 1, 0][n - F.tossN] || 0; tower(w.x, w.base + kn, TOSS_CHIPS[i]); continue; }
+      tower(Math.round(POT_TOWERS[i] + (w.x - POT_TOWERS[i]) * t), Math.round(POT_BASE + (w.base - POT_BASE) * t - 48 * t * (1 - t)), TOSS_CHIPS[i]);
+    }
+  }
+  // ----- hero
+  const heroLift = f >= F.lift && !folded ? 2 : 0;
+  if (folded) {
+    const n = f - F.call; const t = ease(n, 7, 'SWEEP');
+    if (t < 1) { cardBack(Math.round(128 + (157 - 128) * t), Math.round(174 + (90 - 174) * t), 'M', 2); }
+  } else {
+    card(128, 174 - heroLift, 'M', S.hero[0], K.paper, 2);
+    card(152, 174 - heroLift, 'M', S.hero[1], K.paper, 2);
+  }
+  let hs = S.heroStack - CHIP * (f >= F.heroChips && !folded ? Math.max(0, Math.min(6, Math.floor((f - F.heroChips) / F.stagger) + 1)) : 0) + sumTo(tossLanded);
+  text('you', 128, 227, 1, K.text); text(fmt(hs), 128 + 28, 227, 1, K.text);
+  if (deciding(f)) { // the hero's clock: the only loop in the game
+    const left = 1 - (f - F.decide) / (F.commit - F.decide);
+    rect(128, 241, Math.max(1, Math.round(70 * left)), 1, K['text-dim']);
+  }
+
+  // ----- the slip
+  if (f >= F.decide) {
+    const after = f >= F.commit;
+    const fl = flipScale(after ? f - F.flip : -1);
+    const pour = after ? Math.max(0, Math.min(S.HAVE, (f - F.pour) * 2)) : 0;
+    const poured = after && f >= pourDone;
+    const r = readAt(f);
+    let pencil = null;
+    if (deciding(f)) { if (hover !== null) pencil = hover; else if (digitBuf) pencil = Number(digitBuf) * 10; }
+    slip({ need: S.NEED, have: S.HAVE, read: r, face: after && fl.face, scaleX: fl.s, pour, showLoss: poured, showHave: poured, pencil });
+    if (!after || fl.s >= 1) priceTab(S.NEED);
+  }
+
+  drawCoach(f);
+  drawActionBar(f);
+}
+
+// ---------- input
+function commit(v) {
+  if (!deciding(frame)) return;
+  read = v; userRead = v !== null; hover = null; digitBuf = '';
+  frame = F.commit;
+  if (frozen) { frozen = null; if (REDUCED) { frame = verdictAt + 4; render(); return; } requestAnimationFrame(tick); }
+}
+function press(id) { pressed = id; pressedUntil = frame + 6; }
+let pendingAct = null;
+function act(kind) {
+  press(kind);
+  if (kind === 'raise' || frame >= F.call || folded) { if (frozen) render(); return; }
+  pendingAct = kind;
+  if (deciding(frame)) commit(userRead ? read : null);
+  if (REDUCED) { if (kind === 'fold') { folded = true; frame = F.call + 30; } else frame = STATES.end; pendingAct = null; render(); return; }
+  if (frozen) { frozen = null; requestAnimationFrame(tick); }
+}
+cv.addEventListener('mousemove', (ev) => {
+  const p = toUnits(ev);
+  hover = deciding(frame) && inBox(p, SLIP) ? Math.max(0, Math.min(100, SLIP.y + SLIP.base - p.y)) : null;
+  const overBtn = BTNS.some((b) => inBox(p, b));
+  cv.style.cursor = hover !== null ? 'crosshair' : overBtn ? 'pointer' : 'default';
+  if (frozen) render();
+});
+cv.addEventListener('mouseleave', () => { hover = null; if (frozen) render(); });
+cv.addEventListener('click', (ev) => {
+  const p = toUnits(ev);
+  if (deciding(frame) && inBox(p, SLIP)) { commit(Math.max(0, Math.min(100, SLIP.y + SLIP.base - p.y))); return; }
+  const b = BTNS.find((bb) => inBox(p, bb)); if (!b) return;
+  if (b.id.startsWith('preset')) { preset = Number(b.id.slice(6)); press(b.id); if (frozen) render(); return; }
+  act(b.id);
+});
+addEventListener('keydown', (e) => {
+  if (e.target && e.target.tagName === 'INPUT') return; // the raise input owns digits while open
+  if (/^[0-9]$/.test(e.key) && deciding(frame)) {
+    digitBuf += e.key; if (digitBuf.length === 2) commit(Number(digitBuf)); else if (frozen) render();
+    return;
+  }
+  const k = e.key.toLowerCase();
+  if (k === 'f') act('fold'); else if (k === 'c') act('call'); else if (k === 'r') act('raise');
+});
+
+function reset() { pendingAct = null; frame = 0; read = null; userRead = false; digitBuf = ''; folded = false; preset = null; }
+function tick() {
+  if (frozen) return;
+  const holding = (frame === F.commit - 1 && (hover !== null || digitBuf)) && !userRead;
+  if (!holding) frame++;
+  if (pendingAct && frame >= verdictAt + 12 && frame < F.call) frame = F.call;
+  if (frame === F.call) { if (pendingAct === 'fold') folded = true; else press('call'); pendingAct = null; }
+  if (frame >= F.end || (folded && frame >= F.call + 60)) reset();
+  render();
+  requestAnimationFrame(tick);
+}
+function start() { resize(); clearRooms(); slateImg = paintSlate(); render(); if (!frozen) requestAnimationFrame(tick); }
+let started = false;
+addEventListener('resize', () => { if (started) { resize(); clearRooms(); slateImg = paintSlate(); render(); } });
+document.fonts.load('11px DM').then(() => { started = true; start(); }, () => { started = true; start(); });
+
+</script>
+</body>
+</html>
