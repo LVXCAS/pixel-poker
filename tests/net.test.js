@@ -21,6 +21,40 @@
     return got;
   }
 
+  async function withIce(cfg, fetchImpl, fn) {
+    const prevCfg = Net.config, prevFetch = globalThis.fetch;
+    Net.config = cfg; globalThis.fetch = fetchImpl;
+    try { return await fn(); } finally { Net.config = prevCfg; globalThis.fetch = prevFetch; }
+  }
+  const STUN = [{ urls: 'stun:stun.example:19302' }];
+  const okJson = (body) => async () => ({ ok: true, json: async () => body });
+
+  t('resolveIce returns base servers when no relay is configured', async () => {
+    const got = await withIce({ iceServers: STUN, turnUrl: null }, undefined,
+      () => Net.resolveIce(Net.createManualClock()));
+    assert.deepEqual(got, STUN);
+  });
+
+  t('resolveIce appends relay servers fetched from turnUrl', async () => {
+    const relay = [{ urls: 'turns:relay.example:443?transport=tcp', username: 'u', credential: 'c' }];
+    const got = await withIce({ iceServers: STUN, turnUrl: 'https://a.example/1' }, okJson(relay),
+      () => Net.resolveIce(Net.createManualClock()));
+    assert.deepEqual(got, STUN.concat(relay));
+  });
+
+  t('resolveIce ignores a malformed relay response and keeps direct-only', async () => {
+    const got = await withIce({ iceServers: STUN, turnUrl: 'https://a.example/2' }, okJson({ error: 'bad key' }),
+      () => Net.resolveIce(Net.createManualClock()));
+    assert.deepEqual(got, STUN);
+  });
+
+  t('resolveIce falls back to direct-only when the relay fetch fails', async () => {
+    const got = await withIce({ iceServers: STUN, turnUrl: 'https://a.example/3' },
+      async () => { throw new Error('offline'); },
+      () => Net.resolveIce(Net.createManualClock()));
+    assert.deepEqual(got, STUN);
+  });
+
   t('makeCode yields 5 chars from the alphabet (1000 samples)', () => {
     const rng = PP.Cards.seededRng(7);
     for (let i = 0; i < 1000; i++) {

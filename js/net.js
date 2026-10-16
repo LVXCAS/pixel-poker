@@ -39,7 +39,7 @@
     'room-not-found': 'No table with that code.',
     'room-taken': 'Could not reserve a room code. Try again.',
     'service-unreachable': 'Cannot reach the matchmaking server.',
-    'network-blocked': 'Found the table, but this network blocks direct connections.',
+    'network-blocked': 'Found the table, but this network blocks direct connections, and the relay could not get through either. Try a phone hotspot.',
     'browser-unsupported': 'This browser does not support peer-to-peer connections.',
     'host-left': 'The host closed the table.',
     timeout: 'Timed out.',
@@ -672,19 +672,56 @@
     else if (typeof target.removeListener === 'function') target.removeListener(name, fn);
   }
 
-  function peerOptions() {
-    const ice = PP.Net.config && PP.Net.config.iceServers;
-    return ice ? { debug: 0, config: { iceServers: ice } } : { debug: 0 };
+  function peerOptions(ice) {
+    const list = ice || (PP.Net.config && PP.Net.config.iceServers);
+    return list ? { debug: 0, config: { iceServers: list } } : { debug: 0 };
   }
 
-  function openPeer(Peer, id, clock) {
+  // Strict networks (school, office) block direct WebRTC. A TURN relay on port 443
+  // gets through because it looks like ordinary HTTPS. Credentials come from
+  // config.turnUrl (e.g. a Metered.ca credentials endpoint) and are cached.
+  const TURN_FETCH_TIMEOUT_MS = 6000;
+  const TURN_CACHE_MS = 30 * 60 * 1000;
+  const turnCache = { url: null, at: -Infinity, list: null };
+
+  function validIceList(list) {
+    return Array.isArray(list) && list.length > 0 && list.length <= 16 &&
+      list.every((s) => s && (typeof s.urls === 'string' || Array.isArray(s.urls)));
+  }
+
+  async function resolveIce(clock) {
+    const cfg = PP.Net.config || {};
+    const base = cfg.iceServers || null;
+    if (!cfg.turnUrl || typeof globalThis.fetch !== 'function') return base;
+    const now = clock.now();
+    if (turnCache.list && turnCache.url === cfg.turnUrl && now - turnCache.at < TURN_CACHE_MS) {
+      return turnCache.list;
+    }
+    try {
+      const res = await Promise.race([
+        globalThis.fetch(cfg.turnUrl, { credentials: 'omit' }),
+        new Promise((_, rej) => clock.setTimeout(() => rej(new Error('turn timeout')), TURN_FETCH_TIMEOUT_MS)),
+      ]);
+      const list = res && res.ok ? await res.json() : null;
+      if (!validIceList(list)) return base;
+      const merged = (base || []).concat(list);
+      turnCache.url = cfg.turnUrl;
+      turnCache.at = now;
+      turnCache.list = merged;
+      return merged;
+    } catch (err) {
+      return base; // relay unavailable: fall back to direct-only
+    }
+  }
+
+  function openPeer(Peer, id, clock, ice) {
     if (typeof globalThis.RTCPeerConnection !== 'function' && globalThis.document) {
       return Promise.reject(netError(ERR.BROWSER_UNSUPPORTED));
     }
     return new Promise((resolve, reject) => {
       let peer;
       try {
-        peer = id ? new Peer(id, peerOptions()) : new Peer(peerOptions());
+        peer = id ? new Peer(id, peerOptions(ice)) : new Peer(peerOptions(ice));
       } catch (err) {
         reject(netError(ERR.BROWSER_UNSUPPORTED));
         return;
@@ -763,11 +800,12 @@
   async function createPeerHost(o) {
     const clock = o.clock || realClock;
     const Peer = await loadPeerJS(clock);
+    const ice = await resolveIce(clock);
     for (let i = 0; i < MAX_CODE_TRIES; i++) {
       const code = i === 0 && normalizeCode(o.code || '') ? normalizeCode(o.code) : makeCode(o.rng);
       let peer;
       try {
-        peer = await openPeer(Peer, peerIdFor(code), clock);
+        peer = await openPeer(Peer, peerIdFor(code), clock, ice);
       } catch (err) {
         if (err.code === ERR.ROOM_TAKEN) continue;
         throw err;
@@ -806,7 +844,8 @@
     const clock = o.clock || realClock;
     const Peer = await loadPeerJS(clock);
     const hostId = peerIdFor(code);
-    const ref = { peer: await openPeer(Peer, null, clock) };
+    const ice = await resolveIce(clock);
+    const ref = { peer: await openPeer(Peer, null, clock, ice) };
     let conn;
     try {
       conn = await connectConn(ref.peer, hostId, clock);
@@ -815,7 +854,7 @@
       throw err;
     }
     const reconnectFn = async () => {
-      if (ref.peer.destroyed) ref.peer = await openPeer(Peer, null, clock);
+      if (ref.peer.destroyed) ref.peer = await openPeer(Peer, null, clock, ice);
       else if (ref.peer.disconnected) ref.peer.reconnect();
       return connectConn(ref.peer, hostId, clock);
     };
@@ -859,7 +898,8 @@
     CONNECT_TIMEOUT_MS: 15000,
     RECONNECT_DELAYS: [1000, 2000, 4000, 8000, 8000],
     ERR,
-    config: { iceServers: null },
+    config: { iceServers: null, turnUrl: null },
+    resolveIce,
     realClock,
     makeCode,
     normalizeCode,
