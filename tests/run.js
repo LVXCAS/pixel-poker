@@ -20,7 +20,7 @@ const ROOT = path.resolve(__dirname, '..');
 const JS_DIR = path.join(ROOT, 'js');
 const TEST_DIR = __dirname;
 const LOGIC_MODULES = ['cards.js', 'evaluator.js', 'equity.js', 'engine.js', 'bots.js', 'coach.js',
-  'tournament.js', 'net.js', 'remote-engine.js', 'room.js'];
+  'tournament.js', 'net.js', 'net-relay.js', 'remote-engine.js', 'room.js'];
 const TEST_SUFFIX = '.test.js';
 
 const COLORS = process.stdout.isTTY
@@ -34,6 +34,7 @@ function createContext() {
     TESTS: [],
     performance,
     crypto: webcrypto,
+    URL,
     setTimeout,
     clearTimeout,
     setImmediate,

@@ -23,6 +23,8 @@
   const TICK_MS = 1000;
   const PEERJS_LOAD_TIMEOUT_MS = 15000;
   const HOST_DESTROY_DELAY_MS = 500;
+  const PROBE_TIMEOUT_MS = 6000;
+  const PROBE_N = -1;
 
   const ERR = Object.freeze({
     ROOM_NOT_FOUND: 'room-not-found',
@@ -204,12 +206,20 @@
 
   /* ------------------------------------------------------------ host core */
 
+  // Host endpoint -> { attach, onShutdown } so a second transport (js/net-relay.js) can feed the
+  // same core. Not reachable from the network; page code could already do anything anyway.
+  const hostCores = new WeakMap();
+
   function createHostCore(opts) {
     const clock = opts.clock;
     const max = opts.maxInbound;
     const peers = new Map();
     const ev = createEmitter();
     const state = { closed: false, tick: null, pingN: 0, lastPing: clock.now() };
+    const shutdownFns = [];
+    const runShutdown = () => shutdownFns.splice(0).forEach((fn) => {
+      try { fn(); } catch (err) { console.error('[PP.Net] host shutdown hook failed:', err); }
+    });
 
     const ep = {
       role: 'host',
@@ -320,6 +330,7 @@
         rec.conn.close();
       });
       peers.clear();
+      runShutdown();
       if (typeof opts.onClose === 'function') opts.onClose();
     }
 
@@ -331,10 +342,17 @@
         rec.gone = true;
       });
       peers.clear();
+      runShutdown();
     }
 
+    const onShutdown = (fn) => {
+      if (typeof fn !== 'function') return;
+      if (state.closed) fn();
+      else shutdownFns.push(fn);
+    };
+    hostCores.set(ep, { attach, onShutdown });
     state.tick = clock.setTimeout(tick, TICK_MS);
-    return { ep, attach, kill, emitError: (err) => ev.emit('error', err) };
+    return { ep, attach, kill, onShutdown, emitError: (err) => ev.emit('error', err) };
   }
 
   /* ---------------------------------------------------------- client core */
@@ -797,6 +815,26 @@
     });
   }
 
+  /** Data can be blocked even after the channel "opens": require one _ping/_pong round trip. */
+  function probeConn(conn, clock) {
+    return new Promise((resolve, reject) => {
+      let done = false;
+      const finish = (err) => {
+        if (done) return;
+        done = true;
+        clock.clearTimeout(timer);
+        if (err) reject(err);
+        else resolve(conn);
+      };
+      const timer = clock.setTimeout(() => finish(netError(ERR.NETWORK_BLOCKED)), PROBE_TIMEOUT_MS);
+      conn.onData((msg) => {
+        if (msg && msg.t === '_pong' && msg.n === PROBE_N) finish(null);
+      });
+      conn.onClose(() => finish(netError(ERR.NETWORK_BLOCKED)));
+      if (!conn.send({ t: '_ping', n: PROBE_N })) finish(netError(ERR.NETWORK_BLOCKED));
+    });
+  }
+
   async function createPeerHost(o) {
     const clock = o.clock || realClock;
     const Peer = await loadPeerJS(clock);
@@ -849,7 +887,9 @@
     let conn;
     try {
       conn = await connectConn(ref.peer, hostId, clock);
+      await probeConn(conn, clock);
     } catch (err) {
+      if (conn) conn.close();
       try { ref.peer.destroy(); } catch (e) { /* ignore */ }
       throw err;
     }
@@ -912,5 +952,10 @@
     createHost,
     join,
     Loopback: Object.freeze({ createHub }),
+    // Transport plumbing for js/net-relay.js; not part of the app-facing API.
+    _internal: Object.freeze({
+      createHostCore, createClientCore, probeConn, isReserved,
+      hostCoreOf: (ep) => hostCores.get(ep) || null,
+    }),
   };
 })();

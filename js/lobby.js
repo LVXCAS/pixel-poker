@@ -37,7 +37,7 @@
   const ERRORS = {
     'room-not-found': ['no such table', (c) => 'no table with code ' + (c || '?????') + '. codes are 5 characters, no O/I/L/0/1 — check with your host.'],
     'host-left': ['the table closed', () => "the host closed the table. the game lives in the host's browser, so it can't continue without them."],
-    'network-blocked': ['network blocked', () => 'found the table, but your network blocks direct connections — common on school/work/public wi-fi. try a phone hotspot or home wi-fi.'],
+    'network-blocked': ['network blocked', () => "found the table, but this network blocks direct connections and our backup relay couldn't get through either — common on school/work wi-fi. try again in a few minutes, or switch to a phone hotspot."],
     'service-unreachable': ['server unreachable', () => 'check your connection — single-player still works offline.'],
     'room-full': ['table is full', () => 'every seat and every spot on the rail is taken. ask the host to make room.'],
     locked: ['table is locked', () => "they aren't letting anyone new in right now. ask them to unlock it."],
