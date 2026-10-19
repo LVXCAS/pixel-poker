@@ -462,13 +462,13 @@
   async function createHost(options) {
     const o = options || {};
     const mode = transportOf(o);
-    if (mode === 'direct') return (o.p2pHost || base.createHost)(o);
+    if (mode === 'direct') return withRelayStatus(await (o.p2pHost || base.createHost)(o), () => 'off');
     const fb = firebaseBackend(o);
     if (mode === 'relay') {
       const url = fb ? null : await resolveRelayUrl(o, true);
       if (!fb && !url) throw Net.netError(ERR.RELAY_OFFLINE);
       try {
-        return await (fb ? fb.createOnlyHost(o) : createRelayOnlyHost(o, url));
+        return withRelayStatus(await (fb ? fb.createOnlyHost(o) : createRelayOnlyHost(o, url)), () => 'on');
       } catch (err) {
         throw relayModeError(err);
       }
@@ -482,14 +482,27 @@
       const url = fallback && !fb ? await resolveRelayUrl(o) : null;
       if (!(fallback && fb) && !url) throw err;
       try {
-        return await (fb ? fb.createOnlyHost(o) : createRelayOnlyHost(o, url));
+        return withRelayStatus(await (fb ? fb.createOnlyHost(o) : createRelayOnlyHost(o, url)), () => 'on');
       } catch (relayErr) {
         throw err;
       }
     }
     const hooks = wantRelay ? Net._internal.hostCoreOf(ep) : null;
-    if (hooks && fb) fb.startHostSession(hooks, ep.code, o);
-    else if (hooks) startHostSession(hooks, ep.code, o);
+    let session = null;
+    if (hooks && fb) session = fb.startHostSession(hooks, ep.code, o);
+    else if (hooks) session = startHostSession(hooks, ep.code, o);
+    return withRelayStatus(ep, () => sessionStatus(session));
+  }
+
+  // 'on' | 'connecting' | 'off': lets the host lobby show whether relay players can find the room.
+  function sessionStatus(session) {
+    if (!session || session.stopped) return 'off';
+    const wsOpen = session.ws && session.ws.readyState === 1;
+    return session.bound || wsOpen ? 'on' : 'connecting';
+  }
+
+  function withRelayStatus(ep, fn) {
+    try { ep.relayStatus = fn; } catch (err) { /* frozen endpoint: status unknown */ }
     return ep;
   }
 

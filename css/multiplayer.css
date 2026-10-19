@@ -198,6 +198,9 @@
 .mp-hub-bar:has(.mp-hub-conn-row) .mp-hub-foot { margin-top: 0; }
 .mp-hub-bar:has(.mp-hub-conn-row) .mp-profile .mp-av-2 { width: calc(18 * var(--mu)); height: calc(18 * var(--mu)); }
 .mp-connuse { display: flex; gap: calc(4 * var(--mu)); color: var(--mp-text); }
+.mp-relay-status[data-state="on"] { color: var(--mp-ok); }
+.mp-relay-status[data-state="connecting"] { color: var(--mp-warn); }
+.mp-relay-status[data-state="off"] { color: var(--mp-bad); }
 .mp-connpick .mp-seg button { color: var(--mp-text); box-shadow: inset 0 calc(-1 * var(--mu)) 0 var(--mp-line); }
 .mp-connpick .mp-seg button:hover:not([aria-pressed="true"]) { background: var(--mp-panel-2); }
 .mp-connpick .mp-seg button[aria-pressed="true"] { background: var(--mp-accent); color: var(--mp-ink); box-shadow: none; }

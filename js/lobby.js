@@ -39,7 +39,7 @@
   });
   const BASE_SB = [10, 15, 25, 50, 75, 100];
   const ERRORS = {
-    'room-not-found': ['no such table', (c) => 'no table with code ' + (c || '?????') + '. codes are 5 characters, no O/I/L/0/1 — check with your host.'],
+    'room-not-found': ['no such table', (c) => 'no table with code ' + (c || '?????') + '. check the code with your host. if it is right: the host should refresh the page, set connection to auto or relay, and host again — their lobby must say "relay on".'],
     'host-left': ['the table closed', () => "the host closed the table. the game lives in the host's browser, so it can't continue without them."],
     'network-blocked': ['network blocked', () => "found the table, but this network blocks direct connections and our backup relay couldn't get through either — common on school/work wi-fi. try again in a few minutes, or switch to a phone hotspot."],
     'service-unreachable': ['server unreachable', () => 'check your connection — single-player still works offline.'],
@@ -258,11 +258,31 @@
       const row = el('p', 'mp-connuse');
       row.title = 'set on the multiplayer hub before you host';
       row.append(el('span', 'mp-label', 'connection'), el('span', null, transportPref() + ' · ' + TRANSPORT_NOTE[transportPref()]));
+      const status = el('span', 'mp-relay-status');
+      row.append(status);
+      paintRelayStatus(status);
       return row;
+    }
+
+    const RELAY_STATUS_TEXT = { on: ' · relay on ✓', connecting: ' · relay connecting…', off: ' · relay off: school wi-fi players cannot join' };
+    const RELAY_STATUS_POLL_MS = 1000;
+    function paintRelayStatus(node) {
+      const ep = S && S.endpoint;
+      const read = () => (ep && typeof ep.relayStatus === 'function' ? ep.relayStatus() : null);
+      const update = () => {
+        if (!node.isConnected) return false;
+        const st = read();
+        node.textContent = st ? RELAY_STATUS_TEXT[st] || '' : '';
+        node.dataset.state = st || '';
+        return true;
+      };
+      update();
+      const timer = setInterval(() => { if (!update()) clearInterval(timer); }, RELAY_STATUS_POLL_MS);
     }
 
     // ===================================================================== hub
     function openHub() {
+      if (PP.Update) PP.Update.ensureFresh(true); // a stale tab can't find friends' rooms
       flow += 1;
       if (S && !S.inGame) teardown();
       paint('hub', (f) => {
@@ -496,7 +516,7 @@
     function startHost(endpoint, mode) {
       const p = profile();
       const room = new deps.Room.HostRoom({ endpoint, hostName: p.name || 'host', hostAvatar: p.avatar, settings: { mode } });
-      S = { kind: 'host', room, offline: !endpoint, offs: [], inGame: false, spec: null };
+      S = { kind: 'host', room, endpoint, offline: !endpoint, offs: [], inGame: false, spec: null };
       S.offs.push(
         room.on('lobby', () => { if (!S.inGame && screen === 'lobby') renderLobby(); }),
         room.on('end', (res) => onEnd(res)),
