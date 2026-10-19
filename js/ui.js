@@ -648,8 +648,10 @@
   }
 
   function betLabel(id, amount) {
-    const verb = T.verbs.get(id) || '';
     const amt = chips(amount);
+    // Hero's tag sits between the left seat and the hole cards: amount only, so it never runs under either.
+    if (id === T.heroId) return amt;
+    const verb = T.verbs.get(id) || '';
     const full = verb ? verb + ' ' + amt : amt;
     return full.length <= 9 ? full : amt;
   }
@@ -914,7 +916,8 @@
 
   function floatText(playerId, text, kind) {
     const L = T.layout.get(playerId);
-    const at = L ? (L.key === 'HERO' ? { x: L.x + 76, y: L.y + 56 } : { x: L.x + 16, y: L.y + 30 }) : CENTER;
+    // Hero: the open felt left of the hole cards; the nameplate and the slip leave no room elsewhere.
+    const at = L ? (L.key === 'HERO' ? { x: L.x - 58, y: L.y - 10 } : { x: L.x + 16, y: L.y + 30 }) : CENTER;
     const node = fxAt('float-text ' + (kind || ''), String(text).toLowerCase(), at);
     if (node) setTimeout(() => node.remove(), FLOAT_MS);
   }
