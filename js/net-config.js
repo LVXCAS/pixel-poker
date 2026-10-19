@@ -25,6 +25,12 @@
     //     appId: '1:1234567890:web:abc123',
     //   },
     // This config is public by design (it ships to every browser); database.rules.json is the lock.
-    firebase: null,
+    firebase: {
+      apiKey: 'AIzaSyAzmENN-fbSMOIawIHPFLP3geTaijRcuM0',
+      authDomain: 'pixel-holdem.firebaseapp.com',
+      databaseURL: 'https://pixel-holdem-default-rtdb.firebaseio.com',
+      projectId: 'pixel-holdem',
+      appId: '1:1014570229813:web:ece601196b493a3258517c',
+    },
   });
 })();
