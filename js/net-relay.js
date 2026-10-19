@@ -18,6 +18,10 @@
  *   'relay'  relay only: the client joins straight over the relay (no PeerJS attempt) and the host
  *            hosts relay-only. No relay configured / reachable -> NetError 'relay-offline'.
  * options.forceRelay / ?forceRelay=1 (localhost) are the old test switches; they mean 'relay' on join.
+ *
+ * Relay BACKEND: if PP.Net.config.firebase (or options.firebase) is set and js/net-firebase.js is
+ * loaded, the relay role runs on Firebase Realtime Database (PP.Net.Firebase) and relay.json is never
+ * fetched; otherwise it is the WebSocket relay above. 'direct' never touches either backend.
  */
 (function () {
   'use strict';
@@ -57,6 +61,15 @@
       ? err : Net.netError(ERR.RELAY_OFFLINE);
   }
   const urlCache = { src: null, at: -Infinity, url: null };
+
+  /** The Firebase relay backend when it is configured for this call, else null (WebSocket relay). */
+  function firebaseBackend(o) {
+    const fb = Net.Firebase;
+    return fb && fb.configOf(o) ? fb : null;
+  }
+
+  /** Whether loopback (hub) test setups asked for a relay explicitly. */
+  const relayRequested = (o) => !!o.relayUrl || o.firebase !== undefined;
 
   /* ------------------------------------------------------------- relay URL */
 
@@ -275,7 +288,15 @@
     if (!normalized) throw Net.netError(ERR.ROOM_NOT_FOUND);
     const mode = transportOf(o);
     if (mode === 'direct') return (o.p2pJoin || base.join)(normalized, o);
+    const fb = firebaseBackend(o);
     if (mode === 'relay' || o.forceRelay || pageOverrides(o).forceRelay) {
+      if (fb) {
+        try {
+          return await fb.join(normalized, o);
+        } catch (err) {
+          throw relayModeError(err);
+        }
+      }
       const url = await resolveRelayUrl(o, true);
       if (!url) throw Net.netError(ERR.RELAY_OFFLINE);
       try {
@@ -284,11 +305,18 @@
         throw relayModeError(err);
       }
     }
-    if (o.hub && !o.relayUrl) return base.join(normalized, o);
+    if (o.hub && !relayRequested(o)) return base.join(normalized, o);
     try {
       return await (o.p2pJoin || base.join)(normalized, o);
     } catch (err) {
       if (!err || !FALLBACK_CODES.has(err.code)) throw err;
+      if (fb) {
+        try {
+          return await fb.join(normalized, o);
+        } catch (relayErr) {
+          throw pickError(err, relayErr);
+        }
+      }
       const url = await resolveRelayUrl(o);
       if (!url) throw err;
       try {
@@ -435,31 +463,33 @@
     const o = options || {};
     const mode = transportOf(o);
     if (mode === 'direct') return (o.p2pHost || base.createHost)(o);
+    const fb = firebaseBackend(o);
     if (mode === 'relay') {
-      const url = await resolveRelayUrl(o, true);
-      if (!url) throw Net.netError(ERR.RELAY_OFFLINE);
+      const url = fb ? null : await resolveRelayUrl(o, true);
+      if (!fb && !url) throw Net.netError(ERR.RELAY_OFFLINE);
       try {
-        return await createRelayOnlyHost(o, url);
+        return await (fb ? fb.createOnlyHost(o) : createRelayOnlyHost(o, url));
       } catch (err) {
         throw relayModeError(err);
       }
     }
-    const wantRelay = !o.hub || !!o.relayUrl;
+    const wantRelay = !o.hub || relayRequested(o);
     let ep;
     try {
       ep = await (o.p2pHost || base.createHost)(o);
     } catch (err) {
       const fallback = wantRelay && err && (err.code === ERR.SERVICE_UNREACHABLE || err.code === ERR.BROWSER_UNSUPPORTED);
-      const url = fallback ? await resolveRelayUrl(o) : null;
-      if (!url) throw err;
+      const url = fallback && !fb ? await resolveRelayUrl(o) : null;
+      if (!(fallback && fb) && !url) throw err;
       try {
-        return await createRelayOnlyHost(o, url);
+        return await (fb ? fb.createOnlyHost(o) : createRelayOnlyHost(o, url));
       } catch (relayErr) {
         throw err;
       }
     }
     const hooks = wantRelay ? Net._internal.hostCoreOf(ep) : null;
-    if (hooks) startHostSession(hooks, ep.code, o);
+    if (hooks && fb) fb.startHostSession(hooks, ep.code, o);
+    else if (hooks) startHostSession(hooks, ep.code, o);
     return ep;
   }
 

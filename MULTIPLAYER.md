@@ -176,6 +176,16 @@ order per connection, and **JSON round-tripped** (`JSON.parse(JSON.stringify(msg
 non-serializable payloads and shared-mutation bugs. Size caps and `_ping` handling behave exactly as with PeerJS.
 Client peer ids in loopback: `'peer-1'`, `'peer-2'`, ….  `join` to an unknown code rejects `room-not-found`.
 
+### 2.4b Relay backends (`js/net-relay.js` picks, `js/net-firebase.js` provides one)
+The "relay" role (transport `'relay'`, plus the `'auto'` fallback / host registration alongside PeerJS) has two
+backends. If `PP.Net.config.firebase` (or `options.firebase`) holds a valid web config, it runs on **Firebase
+Realtime Database** (`PP.Net.Firebase`): SDK 10.12.2 lazy-loaded via dynamic `import()` from gstatic only when
+needed, anonymous auth (session persistence, one uid per tab), ids `'f-' + uid`, data layout documented at the top
+of `js/net-firebase.js`, locked down by `database.rules.json` (setup: `relay/FIREBASE.md`). Otherwise it is the
+WebSocket relay (`relay/server.js` via `relay.json`). `'direct'` touches neither. SDK load / sign-in failure →
+`relay-offline`. Tests: `tests/net-firebase.test.js` against `tests/firebase-fake.js` (in-memory RTDB + a JS mirror
+of the rules). Localhost-only `?fakeFirebase=1` runs the page on that fake (shared across tabs via localStorage).
+
 ### 2.5 Joining from an invite link
 `?room=CODE` in the URL → Lobby opens the Join screen prefilled. The param is kept (a refresh = rejoin attempt).
 
@@ -735,8 +745,9 @@ hotspot) can host/join, and `node tests/run.js` is green on the deployed commit.
 ### 9.6 Known limits to tell the user
 - The table screen itself is the core UI's layout (CONTRACT: usable down to ~1024px). On a 390px phone the lobby, join
   screen and overlay drawers fit, but the table is clipped on the right. Making the table responsive is core-UI work.
-- No relay of our own: players behind strict NAT/firewalls (school/work wi-fi) get `network-blocked` unless PeerJS's
-  free TURN servers answer. Two-browser check on real networks is still required.
+- Strict NAT/firewalls (school/work wi-fi): the relay carries the game — Firebase RTDB once `config.firebase` is set
+  (see 2.4b), else the WebSocket relay if `relay.json` points at a live one. With neither, `network-blocked`
+  unless PeerJS's free TURN servers answer. Two-browser check on real networks is still required.
 - `turnSeconds: 0` (timer off) means a player who never acts stalls the table until the host kicks them (kick → seat
   offline → disconnect policy plays for them).
 

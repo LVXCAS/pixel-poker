@@ -15,5 +15,16 @@
     // relay.json at the site root pointing at the current tunnel URL.
     relayJsonUrl: 'relay.json',
     relayUrl: null,
+    // Firebase relay (js/net-firebase.js). When set, it REPLACES the WebSocket relay above: nothing
+    // to keep running. Paste the web-app config from the Firebase console (relay/FIREBASE.md):
+    //   firebase: {
+    //     apiKey: 'AIza...',
+    //     authDomain: 'YOUR-PROJECT.firebaseapp.com',
+    //     databaseURL: 'https://YOUR-PROJECT-default-rtdb.firebaseio.com',
+    //     projectId: 'YOUR-PROJECT',
+    //     appId: '1:1234567890:web:abc123',
+    //   },
+    // This config is public by design (it ships to every browser); database.rules.json is the lock.
+    firebase: null,
   });
 })();

@@ -21,8 +21,10 @@ const ROOT = path.resolve(__dirname, '..');
 const JS_DIR = path.join(ROOT, 'js');
 const TEST_DIR = __dirname;
 const LOGIC_MODULES = ['cards.js', 'evaluator.js', 'equity.js', 'engine.js', 'bots.js', 'coach.js',
-  'tournament.js', 'net.js', 'net-relay.js', 'remote-engine.js', 'room.js'];
+  'tournament.js', 'net.js', 'net-relay.js', 'net-firebase.js', 'remote-engine.js', 'room.js'];
 const TEST_SUFFIX = '.test.js';
+// Shared test fakes (tests/<name>), loaded after the logic modules, before any *.test.js.
+const TEST_HELPERS = ['firebase-fake.js'];
 
 const COLORS = process.stdout.isTTY
   ? { green: '\x1b[32m', red: '\x1b[31m', dim: '\x1b[2m', reset: '\x1b[0m' }
@@ -48,6 +50,11 @@ function createContext() {
   sandbox.loadScript = (name) => {
     if (typeof name !== 'string' || !/^[a-z0-9-]+\.js$/.test(name)) throw new Error('loadScript: bad name ' + name);
     runFile(ctx, path.join(JS_DIR, name));
+  };
+  // Read-only access to repo-root JSON files (e.g. database.rules.json) for static checks.
+  sandbox.loadRepoText = (name) => {
+    if (typeof name !== 'string' || !/^[a-z0-9.-]+\.json$/.test(name)) throw new Error('loadRepoText: bad name ' + name);
+    return fs.readFileSync(path.join(ROOT, name), 'utf8');
   };
   return ctx;
 }
@@ -127,6 +134,13 @@ async function main() {
   const failures = [];
   const ctx = createContext();
   loadModules(ctx, failures);
+  for (const name of TEST_HELPERS) {
+    try {
+      runFile(ctx, path.join(TEST_DIR, name));
+    } catch (err) {
+      failures.push({ name: 'load tests/' + name, err });
+    }
+  }
   const loadFailures = failures.length;
 
   let passed = 0;

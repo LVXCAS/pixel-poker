@@ -1,0 +1,57 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "rooms": {
+      "$code": {
+        ".write": "auth != null && !newData.exists() && data.child('host/uid').val() === auth.uid",
+        "host": {
+          ".read": "auth != null && $code.matches(/^[A-HJKMNP-Z2-9]{5}$/)",
+          ".write": "auth != null && $code.matches(/^[A-HJKMNP-Z2-9]{5}$/) && ((!data.exists() && newData.child('uid').val() === auth.uid) || data.child('uid').val() === auth.uid)",
+          ".validate": "newData.hasChildren(['uid', 'createdAt']) && newData.child('uid').val() === auth.uid",
+          "uid": { ".validate": "newData.isString()" },
+          "createdAt": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
+        },
+        "peers": {
+          ".read": "auth != null && root.child('rooms/' + $code + '/host/uid').val() === auth.uid",
+          "$cid": {
+            ".read": "auth != null && auth.uid === $cid",
+            ".write": "auth != null && auth.uid === $cid && (!newData.exists() || root.child('rooms/' + $code + '/host').exists())",
+            ".validate": "newData.hasChildren(['joinedAt', 's'])",
+            "joinedAt": { ".validate": "newData.isNumber()" },
+            "s": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "$other": { ".validate": false }
+          }
+        },
+        "down": {
+          "$cid": {
+            ".read": "auth != null && auth.uid === $cid",
+            ".write": "auth != null && !newData.exists() && (auth.uid === $cid || root.child('rooms/' + $code + '/host/uid').val() === auth.uid)",
+            "$fid": {
+              ".write": "auth != null && (root.child('rooms/' + $code + '/host/uid').val() === auth.uid || (auth.uid === $cid && !newData.exists()))",
+              ".validate": "newData.hasChildren(['d', 'ts'])",
+              "d": { ".validate": "newData.isString() && newData.val().length <= 65536" },
+              "ts": { ".validate": "newData.isNumber()" },
+              "c": { ".validate": "newData.val() === true" },
+              "$other": { ".validate": false }
+            }
+          }
+        },
+        "up": {
+          "$cid": {
+            ".read": "auth != null && root.child('rooms/' + $code + '/host/uid').val() === auth.uid",
+            ".write": "auth != null && !newData.exists() && (auth.uid === $cid || root.child('rooms/' + $code + '/host/uid').val() === auth.uid)",
+            "$fid": {
+              ".write": "auth != null && ((auth.uid === $cid && !data.exists() && newData.exists() && root.child('rooms/' + $code + '/host').exists()) || (!newData.exists() && (auth.uid === $cid || root.child('rooms/' + $code + '/host/uid').val() === auth.uid)))",
+              ".validate": "newData.hasChildren(['d', 'ts'])",
+              "d": { ".validate": "newData.isString() && newData.val().length <= 65536" },
+              "ts": { ".validate": "newData.isNumber()" },
+              "$other": { ".validate": false }
+            }
+          }
+        }
+      }
+    }
+  }
+}
