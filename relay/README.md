@@ -12,6 +12,16 @@ bash <(curl -fsSL https://raw.githubusercontent.com/LVXCAS/pixel-poker/main/rela
 
 If it says you are not logged in, run `gh auth login`, then run the command again (safe to repeat).
 
+## Windows laptop: one command
+
+Open PowerShell and run (installs Git, Node, cloudflared, gh with winget; clones to `~\pixel-poker`; starts the relay now and at every logon):
+
+```
+irm https://raw.githubusercontent.com/LVXCAS/pixel-poker/main/relay/setup-windows.ps1 | iex
+```
+
+If it says GitHub is not logged in, run `gh auth login`, then run the command again. A "PIXEL HOLD'EM relay" window stays open while it runs; closing it stops the relay. The laptop must stay awake (Settings → System → Power → never sleep when plugged in). Remove the logon task: `Unregister-ScheduledTask PixelPokerRelay`. Manual start: double-click `relay\start-windows.cmd`.
+
 ## Only run ONE relay at a time
 
 Laptop OR mini, never both. Both would fight over `relay.json`. Stop the other one first.
