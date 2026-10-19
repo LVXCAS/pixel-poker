@@ -10,7 +10,7 @@ $Dir = Join-Path $HOME "pixel-poker"
 $TaskName = "PixelPokerRelay"
 
 function Say($msg) { Write-Host "-> $msg" -ForegroundColor Yellow }
-function Fail($msg) { Write-Host "!! $msg" -ForegroundColor Red; exit 1 }
+function Fail($msg) { Write-Host "!! $msg" -ForegroundColor Red; throw "setup stopped" }  # throw, not exit: exit would close the window under iex
 
 function Refresh-Path {
   $machine = [Environment]::GetEnvironmentVariable("Path", "Machine")
