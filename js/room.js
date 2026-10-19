@@ -1319,7 +1319,7 @@
 
   async function joinRoom(opts) {
     const o = opts || {};
-    const endpoint = await PP.Net.join(o.code, { hub: o.hub, clock: o.clock });
+    const endpoint = await PP.Net.join(o.code, { hub: o.hub, clock: o.clock, transport: o.transport });
     const client = new ClientRoom(endpoint, o);
     try {
       await client.handshake(Number.isFinite(o.timeoutMs) ? o.timeoutMs : JOIN_TIMEOUT_MS);

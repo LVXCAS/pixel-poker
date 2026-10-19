@@ -349,6 +349,147 @@
     assert.deepEqual(errors, [Net.ERR.HOST_LEFT]);
   });
 
+  /* ------------------------------------------------- transport setting */
+
+  const NO_RELAY_PAGE = { hostname: 'x.example', search: '' };
+  const countingP2P = (fn) => {
+    const calls = { n: 0 };
+    const wrapped = async (...a) => { calls.n += 1; return fn(...a); };
+    return { calls, wrapped };
+  };
+
+  t('transport: TRANSPORTS lists auto, direct, relay; unknown values behave as auto', async () => {
+    assert.deepEqual(Array.from(Net.TRANSPORTS), ['auto', 'direct', 'relay']);
+    const env = await hostEnv({ transport: 'carrier-pigeon' });
+    assert.ok(env.relay.hostSocket('K7QXM'), 'unknown transport = auto: registered on the relay too');
+    env.host.close();
+  });
+
+  t('transport host auto: PeerJS host AND relay registration', async () => {
+    const clock = Net.createManualClock();
+    const relay = createFakeRelay();
+    const hub = Net.Loopback.createHub({ clock });
+    const host = await Net.createHost({ hub, clock, code: 'K7QXM', relayUrl: URL_OK, WebSocket: relay.WebSocket, transport: 'auto' });
+    await flush();
+    assert.notEqual(host.transport, 'relay');
+    assert.ok(relay.hostSocket('K7QXM'));
+    const p2p = await Net.join('K7QXM', { hub, clock });
+    assert.ok(p2p.peerId);
+    host.close();
+  });
+
+  t('transport host direct: PeerJS only, the room is never registered on the relay', async () => {
+    const clock = Net.createManualClock();
+    const relay = createFakeRelay();
+    const hub = Net.Loopback.createHub({ clock });
+    const host = await Net.createHost({ hub, clock, code: 'K7QXM', relayUrl: URL_OK, WebSocket: relay.WebSocket, transport: 'direct' });
+    await flush();
+    await clock.advance(60000);
+    await flush();
+    assert.equal(relay.sockets.length, 0, 'no relay socket opened');
+    await assert.rejects(Net.join('K7QXM', { clock, relayUrl: URL_OK, WebSocket: relay.WebSocket, transport: 'relay' }),
+      (e) => e.code === Net.ERR.ROOM_NOT_FOUND, 'not reachable over the relay');
+    const p2p = await Net.join('K7QXM', { hub, clock, transport: 'direct' });
+    assert.ok(p2p.peerId);
+    host.close();
+  });
+
+  t('transport host direct: a PeerJS failure is reported, no relay-only fallback', async () => {
+    const relay = createFakeRelay();
+    await assert.rejects(Net.createHost({ clock: Net.createManualClock(), code: 'K7QXM', relayUrl: URL_OK,
+      WebSocket: relay.WebSocket, transport: 'direct', p2pHost: blocked(Net.ERR.SERVICE_UNREACHABLE) }),
+    (e) => e.code === Net.ERR.SERVICE_UNREACHABLE);
+    assert.equal(relay.sockets.length, 0);
+  });
+
+  t('transport host relay: PeerJS skipped, room hosted on the relay alone', async () => {
+    const clock = Net.createManualClock();
+    const relay = createFakeRelay();
+    const p2p = countingP2P(async () => { throw new Error('PeerJS must not be touched'); });
+    const host = await Net.createHost({ clock, code: 'K7QXM', relayUrl: URL_OK, WebSocket: relay.WebSocket,
+      transport: 'relay', p2pHost: p2p.wrapped });
+    assert.equal(p2p.calls.n, 0);
+    assert.equal(host.transport, 'relay');
+    assert.equal(host.code, 'K7QXM');
+    const joins = [];
+    host.onPeerJoin((id) => joins.push(id));
+    const c = await Net.join('K7QXM', { clock, relayUrl: URL_OK, WebSocket: relay.WebSocket, transport: 'relay' });
+    await flush();
+    assert.deepEqual(joins, [c.peerId]);
+    host.close();
+  });
+
+  t('transport host relay: no relay configured or relay down -> relay-offline', async () => {
+    await withConfig({}, undefined, () => assert.rejects(
+      Net.createHost({ clock: Net.createManualClock(), transport: 'relay', location: NO_RELAY_PAGE }),
+      (e) => e.code === Net.ERR.RELAY_OFFLINE && /try auto or direct/i.test(e.message)));
+    await withConfig({ relayJsonUrl: 'relay.json' }, async () => ({ ok: true, json: async () => ({ url: null }) }), () => assert.rejects(
+      Net.createHost({ clock: Net.createManualClock(), transport: 'relay', location: NO_RELAY_PAGE }),
+      (e) => e.code === Net.ERR.RELAY_OFFLINE, 'relay.json url null'));
+    const relay = createFakeRelay();
+    relay.refuse = true;
+    await assert.rejects(Net.createHost({ clock: Net.createManualClock(), code: 'K7QXM', relayUrl: URL_OK,
+      WebSocket: relay.WebSocket, transport: 'relay' }), (e) => e.code === Net.ERR.RELAY_OFFLINE, 'relay unreachable');
+  });
+
+  t('transport client auto: PeerJS first, relay fallback', async () => {
+    const env = await hostEnv();
+    const p2p = countingP2P(blocked());
+    const c = await relayJoin(env, { transport: 'auto', p2pJoin: p2p.wrapped });
+    assert.equal(p2p.calls.n, 1);
+    assert.equal(c.transport, 'relay');
+    c.close();
+    env.host.close();
+  });
+
+  t('transport client direct: PeerJS only, a blocked network never falls back to the relay', async () => {
+    const env = await hostEnv();
+    const before = env.relay.sockets.length;
+    await assert.rejects(relayJoin(env, { transport: 'direct' }), (e) => e.code === Net.ERR.NETWORK_BLOCKED);
+    assert.equal(env.relay.sockets.length, before, 'no relay socket opened');
+    const ok = await Net.join('K7QXM', { hub: env.hub, clock: env.clock, relayUrl: URL_OK, WebSocket: env.relay.WebSocket, transport: 'direct' });
+    assert.notEqual(ok.transport, 'relay');
+    env.host.close();
+  });
+
+  t('transport client relay: no PeerJS attempt, straight onto the relay', async () => {
+    const env = await hostEnv();
+    const p2p = countingP2P(async () => { throw new Error('PeerJS must not be touched'); });
+    const c = await relayJoin(env, { transport: 'relay', p2pJoin: p2p.wrapped });
+    assert.equal(p2p.calls.n, 0);
+    assert.equal(c.transport, 'relay');
+    await flush();
+    assert.ok(env.joins.includes(c.peerId));
+    c.close();
+    env.host.close();
+  });
+
+  t('transport client relay: relay offline -> relay-offline; unknown room on the relay -> room-not-found', async () => {
+    await withConfig({}, undefined, () => assert.rejects(
+      Net.join('K7QXM', { clock: Net.createManualClock(), transport: 'relay', location: NO_RELAY_PAGE }),
+      (e) => e.code === Net.ERR.RELAY_OFFLINE));
+    const env = await hostEnv();
+    env.relay.refuse = true;
+    await assert.rejects(relayJoin(env, { transport: 'relay' }), (e) => e.code === Net.ERR.RELAY_OFFLINE);
+    env.relay.refuse = false;
+    await assert.rejects(Net.join('ZZZZZ', { clock: env.clock, relayUrl: URL_OK, WebSocket: env.relay.WebSocket, transport: 'relay' }),
+      (e) => e.code === Net.ERR.ROOM_NOT_FOUND);
+    env.host.close();
+  });
+
+  t('transport: Room.joinRoom forwards the setting to Net.join', async () => {
+    const seen = [];
+    const join = Net.join;
+    Net.join = async (code, o) => { seen.push(o.transport); throw Net.netError(Net.ERR.RELAY_OFFLINE); };
+    try {
+      await assert.rejects(PP.Room.joinRoom({ code: 'K7QXM', name: 'x', avatar: 'a1', transport: 'relay' }),
+        (e) => e.code === Net.ERR.RELAY_OFFLINE);
+    } finally {
+      Net.join = join;
+    }
+    assert.deepEqual(seen, ['relay']);
+  });
+
   /* ---------------------------------------------------------- data probe */
 
   function fakeConn(answer) {

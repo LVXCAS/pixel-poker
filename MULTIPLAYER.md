@@ -105,11 +105,17 @@ All rejections / `onError` payloads are `NetError`: `{ name: 'NetError', code, m
 `'service-unreachable'` (PeerJS script failed to load, signaling timeout, server-error/socket-error/network),
 `'network-blocked'` (signaling OK but data channel never opened — ICE/NAT/firewall),
 `'browser-unsupported'` (browser-incompatible / no RTCPeerConnection), `'host-left'` (connection lost and reconnect
-failed or host sent `closed`), `'timeout'`, `'closed'`.
+failed or host sent `closed`), `'timeout'`, `'closed'`, `'relay-offline'` (transport `'relay'` chosen but no relay is
+configured or reachable — "try auto or direct").
 
 ### 2.3 Endpoints (identical shape for PeerJS and Loopback)
 ```js
-PP.Net.createHost({ code?, hub?, clock?, rng? }) -> Promise<HostEndpoint>
+PP.Net.createHost({ code?, hub?, clock?, rng?, transport? }) -> Promise<HostEndpoint>
+   // transport (js/net-relay.js, PP.Net.TRANSPORTS): 'auto' (default: PeerJS + relay registration / relay-only
+   // fallback), 'direct' (PeerJS only, never registers on the relay), 'relay' (relay-only host, no PeerJS).
+   // Same option on PP.Net.join: 'auto' = PeerJS then relay fallback, 'direct' = never falls back,
+   // 'relay' = straight onto the relay (no PeerJS wait). The Lobby persists the player's pick
+   // (`transport` in 'pixelholdem.mp.v1') and passes it here / through Room.joinRoom({ transport }).
   // hub given -> Loopback; else PeerJS. On 'unavailable-id' regenerate the code (max 5 tries) -> else 'room-taken'.
 HostEndpoint = {
   role: 'host', code,
@@ -387,7 +393,7 @@ finish: results (sng: tournament.results(); cash: standings by stack), broadcast
 
 ### 5.5 ClientRoom
 ```js
-const client = await PP.Room.joinRoom({ code, name, avatar, token?, hub?, clock? })  // Net.join + hello; resolves on welcome
+const client = await PP.Room.joinRoom({ code, name, avatar, token?, hub?, clock?, transport? })  // Net.join + hello; resolves on welcome
    // rejects NetError (room-not-found, network-blocked, service-unreachable, ...) or reject codes as NetError
 client.selfId (wire seat id or null) ; client.role ; client.token ; client.lobby (LobbyState)
 client.engine        // RemoteEngine, created on `start` (re-created on each new game)
@@ -626,7 +632,9 @@ function startNetGame(spec) {
   else spec.engine.actionProvider = provider;
   bindEngineEvents(g);
   g.engine.on('handEnd', (p) => { if (isLive(g)) netAfterHand(g, (p && p.record) || {}); });  // never awaits a modal
-  g.engine.on('sync', (p) => { if (isLive(g)) { g.hand = newHandState(p.view); UI.renderView(p.view); } });
+  g.engine.on('sync', (p) => { if (isLive(g) && p && p.view) restoreNetHand(g, p.view); });
+  // restoreNetHand: hand label + UI.restoreHand(view) (marks the hand dealt so hole cards render: own face up,
+  // others face down) + whose turn. A rejoin rebuilds the table on `start`, so the snapshot is all there is.
   const offs = [
     spec.room.on('timer', (t) => UI.startTimer(t.playerId, t.ms)),
     spec.room.on('turnCancelled', (t) => { if (t.playerId === HERO_ID && UI.isAwaitingHuman()) UI.cancelHumanAction(); }),
@@ -643,7 +651,7 @@ function startNetGame(spec) {
   UI.byId('tb-hand').textContent = 'HAND #' + (g.engine.handNumber || 0);
   const view = g.engine.publicView(HERO_ID);
   g.hand = newHandState(view);
-  if (view.handNumber > 0) UI.renderView(view);                  // late join / rejoin: the sync may already be in
+  if (view.handNumber > 0) restoreNetHand(g, view);              // late join / rejoin: the sync may already be in
   UI.renderCoach(null, coachOptions());
   syncTopbar();
   UI.log(spec.isHost ? 'Your table is live. Good luck!' : 'Seated at a friend\'s table. Good luck!', 'sep');

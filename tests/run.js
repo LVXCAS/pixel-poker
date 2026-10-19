@@ -5,6 +5,7 @@
  *     then every tests/*.test.js (optionally only files whose name contains `filter`).
  *   - Tests register via TESTS.push({ name, fn }); fn may be async.
  *   - `assert` (node:assert/strict) is exposed on the context.
+ *   - `loadScript('ui.js')` runs a DOM-bound js/ file on demand (after the test installs a fake DOM).
  *   - Exits non-zero if any module/test file fails to load or any test fails.
  */
 'use strict';
@@ -41,7 +42,14 @@ function createContext() {
     queueMicrotask,
   };
   sandbox.globalThis = sandbox;
-  return vm.createContext(sandbox);
+  const ctx = vm.createContext(sandbox);
+  // DOM-bound scripts (js/ui.js, js/main.js) are not preloaded; a test that installs a fake DOM
+  // can load them on demand. Only files under js/ can be loaded.
+  sandbox.loadScript = (name) => {
+    if (typeof name !== 'string' || !/^[a-z0-9-]+\.js$/.test(name)) throw new Error('loadScript: bad name ' + name);
+    runFile(ctx, path.join(JS_DIR, name));
+  };
+  return ctx;
 }
 
 function runFile(ctx, file) {

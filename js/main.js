@@ -344,7 +344,7 @@
 
   function newHandState(view) {
     const hero = (view.players || []).find((p) => p.id === HERO_ID);
-    return { decisions: [], reasonings: {}, heroFolded: !hero || hero.out, heroActed: false };
+    return { decisions: [], reasonings: {}, heroFolded: !hero || hero.out || !!hero.folded, heroActed: false };
   }
 
   function coachOptions(extra) {
@@ -768,7 +768,7 @@
     else spec.engine.actionProvider = provider;
     bindEngineEvents(g);
     g.engine.on('handEnd', (p) => { if (isLive(g)) netAfterHand(g, (p && p.record) || {}); });
-    g.engine.on('sync', (p) => { if (isLive(g)) { g.hand = newHandState(p.view); UI.renderView(p.view); } });
+    g.engine.on('sync', (p) => { if (isLive(g) && p && p.view) restoreNetHand(g, p.view); });
     const offs = [
       spec.room.on('timer', (t) => UI.startTimer(t.playerId, t.ms)),
       spec.room.on('turnCancelled', (t) => { if (t.playerId === HERO_ID && UI.isAwaitingHuman()) UI.cancelHumanAction(); }),
@@ -785,11 +785,26 @@
     UI.byId('tb-hand').textContent = 'HAND #' + (g.engine.handNumber || 0);
     const view = g.engine.publicView(HERO_ID);
     g.hand = newHandState(view);
-    if (view.handNumber > 0) UI.renderView(view);   // late join / rejoin: the sync may already be in
+    if (view.handNumber > 0) restoreNetHand(g, view);   // late join / rejoin: the sync may already be in
     UI.renderCoach(null, coachOptions());
     syncTopbar();
     UI.log(spec.isHost ? 'Your table is live. Good luck!' : 'Seated at a friend\'s table. Good luck!', 'sep');
     return g;
+  }
+
+  /**
+   * Rejoin / late join: the table was just (re)built, so the hand in progress has to come from the
+   * `sync` snapshot alone — hand number, dealt cards (own hole face up, others face down), board,
+   * whose turn it is. A pending turn for us follows as an act and switches the bar to 'hero'.
+   */
+  function restoreNetHand(g, view) {
+    g.hand = newHandState(view);
+    UI.setText(UI.byId('tb-hand'), 'HAND #' + (view.handNumber || 0));
+    UI.restoreHand(view);
+    UI.setHeroRead(heroRead(view));
+    const live = view.handNumber > 0 && view.street !== 'showdown' && !!view.toActId;
+    if (!live) UI.setActionMode('between', '');
+    else if (view.toActId !== HERO_ID) UI.setActionMode('waiting', nameOf(g, view.toActId) + ' is thinking...');
   }
 
   function netAfterHand(g, record) {   // sync and cheap: no stats mixing, no modal

@@ -762,6 +762,17 @@
     renderDealer(view);
   }
 
+  /**
+   * Rebuilds an in-progress hand from one snapshot (net rejoin / late join): the hand events that
+   * normally mark the cards as dealt (handStart, deal) happened before this table existed.
+   */
+  function restoreHand(view) {
+    if (!view || !view.players) return;
+    resetHand();
+    T.dealt = view.handNumber > 0;
+    renderView(view);
+  }
+
   /** Deal hole cards with a staggered animation around the table. Resolves when done. */
   async function dealHoles(view) {
     T.dealt = true;
@@ -1798,7 +1809,7 @@
     // background + effects
     startBackground, setMood, shake, stamp, floatText, flyChips, celebrate, tick,
     // table
-    buildTable, resetHand, setSeatStatus, renderView, dealHoles, revealHole, gatherBets, showAction, showBubble,
+    buildTable, resetHand, restoreHand, setSeatStatus, renderView, dealHoles, revealHole, gatherBets, showAction, showBubble,
     clearBubbles, showHandLabel, setHeroRead, startTimer, stopTimers,
     // human input
     setActionMode, requestHumanAction, triggerAction, adjustRaise, isAwaitingHuman, cancelHumanAction,

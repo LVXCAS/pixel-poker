@@ -22,6 +22,10 @@
   const EMOTE_COOLDOWN_MS = 2000;
   const CONNECTING_AFTER_MS = 1400;
   const OFFLINE_BOTS = [2, 3, 3, 4, 5];
+  // Connection setting (PP.Net transport): auto = direct first + relay backup, direct = PeerJS only,
+  // relay = the WebSocket relay only (school wi-fi that blocks peer-to-peer).
+  const TRANSPORTS = ['auto', 'direct', 'relay'];
+  const TRANSPORT_NOTE = { auto: 'direct + relay backup', direct: 'peer-to-peer only', relay: 'relay only' };
   const EMOTES = ['nh', 'gg', 'wow', 'lol', 'ouch', 'think', 'fire', 'ty'];
   const EMOTE_LABEL = { nh: 'nice hand', gg: 'gg', wow: 'wow', lol: 'lol', ouch: 'ouch', think: 'hmm...', fire: 'on fire', ty: 'ty' };
   const OPTIONS = Object.freeze({
@@ -47,6 +51,8 @@
     timeout: ['timed out', () => "the table didn't answer in time. try again in a moment."],
     'room-taken': ['no free code', () => 'the matchmaking server kept saying the code was taken. try again.'],
     closed: ['connection closed', () => 'the link to the table dropped. try again.'],
+    'network-blocked-direct': ['network blocked', () => 'found the table, but this network blocks direct connections. switch connection to auto or relay (on the hub or the join screen) and try again.'],
+    'relay-offline': ['relay is offline', () => 'relay is offline — try auto or direct. (connection setting, below the cards on the hub.)'],
   };
 
   // -------------------------------------------------------------- tiny helpers
@@ -94,6 +100,7 @@
       profile: normalizeProfile(o.profile),
       rejoin,
       history: Array.isArray(o.history) ? o.history.slice(-HISTORY_MAX) : [],
+      transport: TRANSPORTS.includes(o.transport) ? o.transport : 'auto',
     };
   }
   function makeStore(storage) {
@@ -225,6 +232,35 @@
       return !code || r.code === code ? r : null;
     }
 
+    function transportPref() { return store.read().transport; }
+    /**
+     * "connection: auto · direct · relay" + a one-line hint. Picking re-renders only this control
+     * (typed join fields survive) and persists the choice.
+     */
+    function connectionPick(cls) {
+      const box = el('div', 'mp-connpick' + (cls ? ' ' + cls : ''));
+      const current = transportPref();
+      const pick = (v) => {
+        store.write({ transport: v });
+        const next = connectionPick(cls);
+        box.replaceWith(next);
+        const b = next.querySelector('[data-key="seg-connection-' + v + '"]');
+        if (b) b.focus({ preventScroll: true });
+      };
+      const line = el('span', 'mp-connpick-line');
+      line.append(el('span', 'mp-label', 'connection'),
+        seg('connection', TRANSPORTS.map((v) => ({ label: v, value: v })), current, pick));
+      box.append(line, el('span', 'mp-hint', 'relay = school wi-fi'));
+      return box;
+    }
+    /** Host lobby: the connection this table was opened with (picked on the hub before hosting). */
+    function connectionInUse() {
+      const row = el('p', 'mp-connuse');
+      row.title = 'set on the multiplayer hub before you host';
+      row.append(el('span', 'mp-label', 'connection'), el('span', null, transportPref() + ' · ' + TRANSPORT_NOTE[transportPref()]));
+      return row;
+    }
+
     // ===================================================================== hub
     function openHub() {
       flow += 1;
@@ -284,6 +320,7 @@
         box.append(el('span', 'mp-note', 'last table'), codeBtn('rejoin', r.code, 'orange', () => openJoin(r.code), 'hub-rejoin'));
         bar.append(box);
       }
+      bar.append(connectionPick('mp-hub-conn' + (r ? ' mp-hub-conn-row' : '')));
       const foot = el('p', 'mp-foot mp-hub-foot');
       foot.append(el('b', null, 'play chips only — no real money, ever.'), doc.createTextNode(" the host's browser deals."));
       bar.append(foot);
@@ -344,7 +381,7 @@
       f1.append(el('span', 'mp-label', 'table code'), code, el('span', 'mp-hint', '5 characters · no O, I, L, 0 or 1'));
       const f2 = el('label', 'mp-field');
       f2.append(el('span', 'mp-label', 'your name'), name);
-      left.append(f1, f2, el('div', 'mp-rule'), status);
+      left.append(f1, f2, connectionPick('mp-field'), el('div', 'mp-rule'), status);
       if (J.rejoin) setStatus(status, 'you had a seat here — joining puts you back in it.', 'ok');
       const faces = facePicker(J, name);
       body.append(left, faces.node);
@@ -417,7 +454,8 @@
       setStatus(status, 'finding table…', 'busy');
       const slow = setTimeout(() => { if (my === flow) setStatus(status, 'connecting…', 'busy'); }, CONNECTING_AFTER_MS);
       try {
-        const client = await deps.Room.joinRoom({ code, name, avatar: J.avatar, token: r ? r.token : undefined });
+        const client = await deps.Room.joinRoom({ code, name, avatar: J.avatar, token: r ? r.token : undefined,
+          transport: transportPref() });
         clearTimeout(slow);
         if (my !== flow) { client.leave(); return; }
         setStatus(status, 'joined', 'ok');
@@ -436,10 +474,11 @@
       const mode = opts && opts.mode === 'sng' ? 'sng' : 'cash';
       teardown();
       const my = ++flow;
-      paintBusy('opening a table…', 'getting a code from the matchmaking server', () => openHub());
+      paintBusy('opening a table…', transportPref() === 'relay' ? 'getting a code from the relay'
+        : 'getting a code from the matchmaking server', () => openHub());
       showMp();
       try {
-        const endpoint = await deps.Net.createHost({});
+        const endpoint = await deps.Net.createHost({ transport: transportPref() });
         if (my !== flow) { endpoint.close(); return; }
         startHost(endpoint, mode);
       } catch (err) {
@@ -530,6 +569,7 @@
         const body = el('div', 'mp-body');
         const left = el('div', 'mp-left');
         left.append(codePanel(L, isHost), seatsPanel(L, isHost));
+        if (isHost && !S.offline) left.append(connectionInUse());
         body.append(left, rulesCard(L, isHost));
         f.append(body, lobbyBar(L, isHost));
       });
@@ -717,7 +757,9 @@
 
     // ============================================================ error + busy
     function showError(code, roomCode, retry) {
-      const def = ERRORS[code] || ERRORS.closed;
+      // 'direct' never tries the relay, so the generic "relay couldn't get through either" would mislead.
+      const direct = code === 'network-blocked' && transportPref() === 'direct';
+      const def = direct ? ERRORS['network-blocked-direct'] : ERRORS[code] || ERRORS.closed;
       paint('error', (f) => {
         f.append(head('connection', null, () => openHub()));
         const body = el('div', 'mp-body');

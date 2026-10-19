@@ -11,6 +11,13 @@
  *
  * Relay URL: config.relayUrl, else config.relayJsonUrl ({"url":"wss://..."}, same origin).
  * On localhost only, ?relay=ws://localhost:PORT overrides it (tests); ?forceRelay=1 skips PeerJS.
+ *
+ * options.transport (player setting, see TRANSPORTS):
+ *   'auto'   (default) the behaviour above: PeerJS first, relay alongside / as the fallback.
+ *   'direct' PeerJS only: the host never registers on the relay, the client never falls back.
+ *   'relay'  relay only: the client joins straight over the relay (no PeerJS attempt) and the host
+ *            hosts relay-only. No relay configured / reachable -> NetError 'relay-offline'.
+ * options.forceRelay / ?forceRelay=1 (localhost) are the old test switches; they mean 'relay' on join.
  */
 (function () {
   'use strict';
@@ -35,7 +42,20 @@
     ERR.BROWSER_UNSUPPORTED, ERR.ROOM_NOT_FOUND]);
   const CLOSE_CODES = Object.freeze({ 4404: ERR.ROOM_NOT_FOUND, 4409: ERR.ROOM_TAKEN, 4410: ERR.HOST_LEFT });
 
+  const TRANSPORTS = Object.freeze(['auto', 'direct', 'relay']);
   const base = { createHost: Net.createHost, join: Net.join };
+
+  /** The requested transport; anything unknown is 'auto'. */
+  function transportOf(o) {
+    return TRANSPORTS.includes(o.transport) ? o.transport : 'auto';
+  }
+
+  /** In relay mode "the relay could not be reached" is the whole story; room-level codes pass through. */
+  function relayModeError(err) {
+    const code = err && err.code;
+    return code === ERR.ROOM_NOT_FOUND || code === ERR.ROOM_TAKEN || code === ERR.HOST_LEFT
+      ? err : Net.netError(ERR.RELAY_OFFLINE);
+  }
   const urlCache = { src: null, at: -Infinity, url: null };
 
   /* ------------------------------------------------------------- relay URL */
@@ -253,12 +273,18 @@
     const o = options || {};
     const normalized = Net.normalizeCode(code);
     if (!normalized) throw Net.netError(ERR.ROOM_NOT_FOUND);
-    if (o.hub && !o.relayUrl) return base.join(normalized, o);
-    if (o.forceRelay || pageOverrides(o).forceRelay) {
-      const url = await resolveRelayUrl(o);
-      if (!url) throw Net.netError(ERR.SERVICE_UNREACHABLE);
-      return joinRelay(normalized, o, url);
+    const mode = transportOf(o);
+    if (mode === 'direct') return (o.p2pJoin || base.join)(normalized, o);
+    if (mode === 'relay' || o.forceRelay || pageOverrides(o).forceRelay) {
+      const url = await resolveRelayUrl(o, true);
+      if (!url) throw Net.netError(ERR.RELAY_OFFLINE);
+      try {
+        return await joinRelay(normalized, o, url);
+      } catch (err) {
+        throw relayModeError(err);
+      }
     }
+    if (o.hub && !o.relayUrl) return base.join(normalized, o);
     try {
       return await (o.p2pJoin || base.join)(normalized, o);
     } catch (err) {
@@ -407,6 +433,17 @@
 
   async function createHost(options) {
     const o = options || {};
+    const mode = transportOf(o);
+    if (mode === 'direct') return (o.p2pHost || base.createHost)(o);
+    if (mode === 'relay') {
+      const url = await resolveRelayUrl(o, true);
+      if (!url) throw Net.netError(ERR.RELAY_OFFLINE);
+      try {
+        return await createRelayOnlyHost(o, url);
+      } catch (err) {
+        throw relayModeError(err);
+      }
+    }
     const wantRelay = !o.hub || !!o.relayUrl;
     let ep;
     try {
@@ -428,6 +465,7 @@
 
   Net.createHost = createHost;
   Net.join = join;
+  Net.TRANSPORTS = TRANSPORTS;
   Net.Relay = Object.freeze({
     ID_PREFIX: RELAY_ID_PREFIX,
     validRelayUrl,

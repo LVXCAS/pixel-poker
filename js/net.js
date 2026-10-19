@@ -35,6 +35,7 @@
     HOST_LEFT: 'host-left',
     TIMEOUT: 'timeout',
     CLOSED: 'closed',
+    RELAY_OFFLINE: 'relay-offline',
   });
 
   const ERROR_TEXT = Object.freeze({
@@ -46,6 +47,7 @@
     'host-left': 'The host closed the table.',
     timeout: 'Timed out.',
     closed: 'Connection closed.',
+    'relay-offline': 'The relay is offline. Try auto or direct.',
   });
 
   /* ------------------------------------------------------------------ helpers */
