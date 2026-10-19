@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Install a per-user LaunchAgent (com.pixelpoker.relay) that runs relay/start.sh at login and
 # restarts it if it exits. Logs: ~/Library/Logs/pixelpoker-relay.log
-# Uninstall: launchctl bootout gui/$(id -u)/com.pixelpoker.relay && rm ~/Library/LaunchAgents/com.pixelpoker.relay.plist
+# Uninstall: ./uninstall-macos.sh
 set -euo pipefail
 
 LABEL="com.pixelpoker.relay"
@@ -26,7 +26,7 @@ cat > "$PLIST" <<PLIST
   <key>EnvironmentVariables</key>
   <dict>
     <key>PORT</key><string>$PORT</string>
-    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
   </dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>
@@ -39,4 +39,6 @@ PLIST
 
 launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
 launchctl bootstrap "gui/$(id -u)" "$PLIST"
-echo "installed $LABEL -> $PLIST (log: $LOG)"
+echo "installed $LABEL (RunAtLoad + KeepAlive)"
+echo "log: $LOG"
+echo "stop: ./uninstall-macos.sh"
